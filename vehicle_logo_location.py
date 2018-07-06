@@ -38,12 +38,35 @@ def get_files(file_dir):
     return  cars
     #返回两个list 分别为图片文件名及其标签  顺序已被打乱
 
+def create_h5(file_dir):
+    img_rows = 1280
+    img_cols = 720
+    image =  np.random.rand(len(image_list), 720, 1280, 3).astype('float32')
+    for i in range(len(image_list)):
+        image[i] = np.array(plt.imread(image_list[i]))
+    # Create a new file
+    f = h5py.File(file_dir + 'data.h5', 'w')
+    f.create_dataset('cars', data=image)
+    f.close()
+
+def load_h5(file_dir):
+    dataset = h5py.File(train_dir + 'data.h5', 'r')
+    set_x_orig = np.array(dataset['cars'][:])
+    dataset.close()
+    print(set_x_orig.shape)
+    #测试
+    plt.imshow(set_x_orig[2])
+
+
+
 
 train_dir = '/Users/ryshen/Desktop'
 image_list = get_files(train_dir)
  
 # print(image_list)
 print(len(image_list))
+create_h5(train_dir)
+load_h5(train_dir)
 # print(len(label_list))
 
 
@@ -79,42 +102,42 @@ print(len(image_list))
 #     Test_image[i+testLength-len(image_list)] = np.array(plt.imread(image_list[i]))
 #     # Test_label[i+450-len(image_list)] = np.array(label_list[i])
 
-img_rows = 1280
-img_cols = 720
-# testLength = len(image_list)*0.8;
-image =  np.random.rand(len(image_list), 720, 1280, 3).astype('float32')
-for i in range(len(image_list)):
-    image[i] = np.array(plt.imread(image_list[i]))
-# np.random.rand(len(image_list) - testLength, 1280, 720, 3)
-# Create a new file
-f = h5py.File(train_dir + 'data.h5', 'w')
-# f.create_dataset('X_train', data=Train_image)
-# f.create_dataset('y_train', data=Train_label)
-f.create_dataset('cars', data=image)
-# f.create_dataset('y_test', data=Test_label)
-f.close()
+# img_rows = 1280
+# img_cols = 720
+# # testLength = len(image_list)*0.8;
+# image =  np.random.rand(len(image_list), 720, 1280, 3).astype('float32')
+# for i in range(len(image_list)):
+#     image[i] = np.array(plt.imread(image_list[i]))
+# # np.random.rand(len(image_list) - testLength, 1280, 720, 3)
+# # Create a new file
+# f = h5py.File(train_dir + 'data.h5', 'w')
+# # f.create_dataset('X_train', data=Train_image)
+# # f.create_dataset('y_train', data=Train_label)
+# f.create_dataset('cars', data=image)
+# # f.create_dataset('y_test', data=Test_label)
+# f.close()
 
 # Load hdf5 dataset
-train_dataset = h5py.File(train_dir + 'data.h5', 'r')
-set_x_orig = np.array(train_dataset['cars'][:]) # your train set features
-# train_set_y_orig = np.array(train_dataset['y_train'][:]) # your train set labels
-# test_set_x_orig = np.array(train_dataset['X_test'][:]) # your train set features
-# test_set_y_orig = np.array(train_dataset['y_test'][:]) # your train set labels
-f.close()
+# train_dataset = h5py.File(train_dir + 'data.h5', 'r')
+# set_x_orig = np.array(train_dataset['cars'][:]) # your train set features
+# # train_set_y_orig = np.array(train_dataset['y_train'][:]) # your train set labels
+# # test_set_x_orig = np.array(train_dataset['X_test'][:]) # your train set features
+# # test_set_y_orig = np.array(train_dataset['y_test'][:]) # your train set labels
+# f.close()
 
 
 
-print(set_x_orig.shape)
-# print(train_set_y_orig.shape)
+# print(set_x_orig.shape)
+# # print(train_set_y_orig.shape)
  
-# print(train_set_x_orig.max())
-# print(train_set_x_orig.min())
+# # print(train_set_x_orig.max())
+# # print(train_set_x_orig.min())
  
-# print(test_set_x_orig.shape)
-# print(test_set_y_orig.shape)
+# # print(test_set_x_orig.shape)
+# # print(test_set_y_orig.shape)
 
-#测试
-plt.imshow(set_x_orig[2])
+# #测试
+# plt.imshow(set_x_orig[2])
 # print(train_set_y_orig[222])
 
 
