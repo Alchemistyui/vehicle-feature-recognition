@@ -1,51 +1,33 @@
-
 import os
 import numpy as np
 from PIL import Image
 import tensorflow as tf
 import matplotlib.pyplot as plt
-
 import h5py
 import scipy
+import cv2
 
-def get_files(file_dir):
-    cars = []
-    
-    for file in os.listdir(file_dir+'/数据'): 
-            cars.append(file_dir +'/数据'+'/'+ file) 
-    return  cars
-
-
-def create_h5(file_dir):
-    img_rows = 1280
-    img_cols = 720
-    image =  np.random.rand(len(image_list), 720, 1280, 3).astype('float32')
-    for i in range(len(image_list)):
-        image[i] = np.array(plt.imread(image_list[i]))
-    # Create a new file
-    f = h5py.File(file_dir + 'data.h5', 'w')
-    f.create_dataset('cars', data=image)
-    f.close()
-
-def load_h5(file_dir):
-    dataset = h5py.File(train_dir + 'data.h5', 'r')
-    set_x_orig = np.array(dataset['cars'][:])
-    dataset.close()
-    print(set_x_orig.shape)
-    #测试
-    plt.imshow(set_x_orig[2])
-
-
-
-
+# 二、导入 hdf5 数据集
+#我的图片大小为（64*64*3）
 train_dir = '/Users/ryshen/Desktop'
-image_list = get_files(train_dir)
- 
-# print(image_list)
-print(len(image_list))
-create_h5(train_dir)
-load_h5(train_dir)
-# print(len(label_list))
+train_dataset = h5py.File(train_dir + 'data.h5', 'r')
+X_train = np.array(train_dataset['X_train'][:]) # your train set features
+X_test = np.array(train_dataset['X_test'][:]) # your train set features
+train_dataset.close()
+
+
+print ("number of training examples = " + str(X_train.shape[0]))
+print ("number of test examples = " + str(X_test.shape[0]))
+print ("X_train shape: " + str(X_train.shape))
+print ("X_test shape: " + str(X_test.shape))
+
+# plt.imshow(X_train[2])
+# plt.show()
+
+img = cv2.imread(X_train[2],cv2.IMREAD_GRAYSCALE)
+cv2.imshow('image',img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 
 
