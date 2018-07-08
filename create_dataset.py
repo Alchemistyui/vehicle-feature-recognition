@@ -8,6 +8,7 @@ import cv2
 import h5py
 import scipy
 import pylab
+from scipy.ndimage import filters
 
 def get_files(file_dir):
     cars = []
@@ -101,7 +102,7 @@ def idct(img_dct):
 def sign(img_dct_log):
     imgs = []
     for i in range(len(img_dct_log)):
-        sign = np.sign(a)
+        sign = np.sign(img_dct_log[i])
         imgs.append(sign)
     return imgs
 
@@ -121,10 +122,10 @@ def test(cv2imgs):
      
     img_recor = cv2.idct(img_dct)    #进行离散余弦反变换
 
-    # cv2.imshow('image3',img)
-    # cv2.waitKey(0)
-    # cv2.imshow('image2',img1)
-    # cv2.waitKey(0)
+    cv2.imshow('image3',img)
+    cv2.waitKey(0)
+    cv2.imshow('image2',img1)
+    cv2.waitKey(0)
     # cv2.imshow('image',img_recor)
     # cv2.waitKey(0)
     # cv2.imshow('image1',img_dct)
@@ -150,7 +151,7 @@ def Normalize(data):
         imgs.append((float(j) - m) / (mx - mn) * 255 for j in data)
 
 
-def filter(normal):
+# def filter(normal):
     # sum = 0
     # for i in range(len(normal)):   
     #     for j in range(len(normal[i]):
@@ -170,10 +171,10 @@ image_list = get_files(train_dir)
 create_h5(train_dir)
 load_h5(train_dir)
 cv2imgs = load_picture(image_list)
-# img_dct, img_dct_log = dct(cv2imgs)
+img_dct, img_dct_log = dct(cv2imgs)
 sign_img = sign(img_dct_log)
 gauss_img = GaussianBlur(sign_img)
-normal = Normalize(data)
+# normal = Normalize(gauss_img)
 # idct_img = idct(sign_img)
 test(cv2imgs)
 # print(len(label_list))
