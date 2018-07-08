@@ -195,6 +195,48 @@ def test(cv2imgs):
     img_erosion = cv2.erode(img_open,kernel_erosion,iterations = 1)
     img_dilation = cv2.dilate(img_erosion,kernel_dilation,iterations = 1)
 
+    # img_close = cv2.morphologyEx(gauss,cv2.MORPH_CLOSE,kernel_open)
+
+
+    ret, binary = cv2.threshold(img_dilation,127,255,cv2.THRESH_BINARY)
+    # gray = cv2.cvtColor(img_dilation, cv2.COLOR_BGR2GRAY)
+    bin8bit = binary.astype(np.uint8)
+    # bin8bit = thresh.astype(np.uint8)
+
+
+    ret, contours, hierarchy = cv2.findContours(bin8bit,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    test = cv2.imread('/Users/ryshen/Desktop/test2.png')
+    img_contours = cv2.drawContours(test,contours,-1,(255,0,0),3)
+
+    max_size = 0
+    max_rect = [0, 0, 0, 0]
+
+    for i in range(len(contours)):
+        # //2.4 由轮廓（点集）确定出正外接矩形并绘制
+        # boundRect[i] = boundingRect(Mat(contours[i]));
+        # # //2.4.1获得正外接矩形的左上角坐标及宽高  
+        # int width = boundRect[i].width;
+        # int height = boundRect[i].height;
+        # int x = boundRect[i].x;
+        # int y = boundRect[i].y;
+        # //2.4.2用画矩形方法绘制正外接矩形
+        x, y, w, h = cv2.boundingRect(contours[i])
+        if x*y > max_size:
+            max_rect[0] = x 
+            max_rect[1] = y
+            max_rect[2] = w
+            max_rect[3] = h
+
+    cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 2);
+
+    cutImg = test[max_rect[0]:max_rect[0]+max_rect[2], max_rect[1]:max_rect[1]+max_rect[3]]
+
+    plt.subplot(236)
+    plt.imshow(cutImg)
+    plt.title('cutImg')
+    plt.show()
+
+
 
     plt.subplot(231)
     plt.imshow(img_dct,'gray')
@@ -203,18 +245,18 @@ def test(cv2imgs):
     plt.imshow(gauss,'gray')
     plt.title('gauss')
     plt.subplot(233)
-    plt.imshow(sign,'gray')
-    plt.title('sign')
-    plt.subplot(234)
+    # plt.imshow(sign,'gray')
+    # plt.title('sign')
+    # plt.subplot(234)
     plt.imshow(img_recor,'gray')
     plt.title('idct')
     # plt.show()
     plt.subplot(235)
-    plt.imshow(thresh,'gray')
-    plt.title('thresh')
-    plt.subplot(236)
     plt.imshow(img_dilation,'gray')
     plt.title('img_dilation')
+    plt.subplot(236)
+    plt.imshow(img_contours,'gray')
+    plt.title('img_contours')
     plt.show()
 
 
