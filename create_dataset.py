@@ -9,6 +9,9 @@ import h5py
 import scipy
 import pylab
 from scipy.ndimage import filters
+import scipy.signal as signal
+import pylab as pl
+# import pandas as pd
 # from sklearn import preprocessing
 
 def get_files(file_dir):
@@ -131,43 +134,57 @@ def sign(img_dct_log):
 
 
 def test(cv2imgs):
-    img = cv2.imread('/Users/ryshen/Desktop/test2.png', 0)
+    img = cv2.imread('/Users/ryshen/Desktop/test4.png', 0)
     img1 = img.astype('float')
     # dst = color.rgb2gary(img)
     # img1 = io.imread(image_list[2], 1)
     # print(img1.dtype)
     # io.imshow(dst)
     # io.show()  
+    hann = signal.hann(420)
+    img2 = img1 ** hann
+    # pl.plot(hann)
+    # pl.show()
+    # scipy.signal.hamming()
+    # img2 = img1.rolling(window=5, win_type='hamming')
 
-    img_dct = cv2.dct(img1)         #进行离散余弦变换
+    img_dct = cv2.dct(img2)         #进行离散余弦变换
      
     # img_dct_log = np.log(abs(img_dct))  #进行log处理
-    sign = np.sign(img_dct)
+    # sign = np.sign(img_dct) 
+    # print(img_dct)
+    # print(sign)
+    # sign = np.where(np.absolute(img_dct)<90, 0, img_dct)
+    sign = np.where(img_dct<20, -50, img_dct)
 
+    # square = np.square(sign)
+    # gauss = filters.gaussian_filter(square,0.01)
 
-     
+    
     img_recor = cv2.idct(sign)    #进行离散余弦反变换
 
-    square = np.square(img_recor)
-    gauss = filters.gaussian_filter(square,0.05)
+    square = np.square(img_recor) 
+    # power = np.power(img_recor, 5)
+    # power = img_recor * 10
+    gauss = filters.gaussian_filter(square,0.005)
 
     # normal = Normalize(gauss)
     # normal = preprocessing.MinMaxScaler()
 
-    # normalizedImg = np.zeros((720, 1280))
-    # normalizedImg = cv2.normalize(gauss,  normalizedImg, 0, 1, cv2.NORM_MINMAX)
+    normalizedImg = np.zeros((720, 1280))
+    normalizedImg = cv2.normalize(gauss,  normalizedImg, 0, 255, cv2.NORM_MINMAX)
 
     # normal = normalizedImg * 255
     # print(sign)
 
-    # print(square)
+    # print(img_recor)
 
 
     # normal=exposure.rescale_intensity(img_recor,'img_recor', intensity_range(0, 255))
 
     # print(gauss)
 
-    # print(normal)
+    # print(normalizedImg)
 
     # enh_con = ImageEnhance.Contrast(img_recor)  
     # contrast = 1.5  
@@ -184,16 +201,17 @@ def test(cv2imgs):
 
 
 
-    ret,thresh=cv2.threshold(img1,127,255,cv2.THRESH_BINARY) 
+    ret,thresh=cv2.threshold(gauss,127,255,cv2.THRESH_BINARY) 
 
     kernel_open = np.ones((5, 5), np.uint8)
     kernel_erosion = np.ones((9, 9), np.uint8)
     kernel_dilation = np.ones((13, 13), np.uint8)
+    kernel = np.ones((3, 3), np.uint8)
 
-    img_open = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel_open)
+    img_open = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel)
     # img_open = cv2.morphologyEx(gauss,cv2.MORPH_OPEN,kernel_open)
-    img_erosion = cv2.erode(img_open,kernel_erosion,iterations = 1)
-    img_dilation = cv2.dilate(img_erosion,kernel_dilation,iterations = 1)
+    img_erosion = cv2.erode(img_open,kernel,iterations = 1)
+    img_dilation = cv2.dilate(img_erosion,kernel,iterations = 1)
 
     # img_close = cv2.morphologyEx(gauss,cv2.MORPH_CLOSE,kernel_open)
 
@@ -205,8 +223,8 @@ def test(cv2imgs):
 
 
     ret, contours, hierarchy = cv2.findContours(bin8bit,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-    test = cv2.imread('/Users/ryshen/Desktop/test2.png')
-    img_contours = cv2.drawContours(test,contours,-1,(255,0,0),3)
+    test = cv2.imread('/Users/ryshen/Desktop/test4.png')
+    # img_contours = cv2.drawContours(test,contours,-1,(255,0,0),3)
 
     max_size = 0
     max_rect = [0, 0, 0, 0]
@@ -221,42 +239,65 @@ def test(cv2imgs):
         # int y = boundRect[i].y;
         # //2.4.2用画矩形方法绘制正外接矩形
         x, y, w, h = cv2.boundingRect(contours[i])
-        if x*y > max_size:
+        if w*h > max_size:
             max_rect[0] = x 
             max_rect[1] = y
             max_rect[2] = w
             max_rect[3] = h
+    # print(max_rect)
+    # green = cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 5);
+    # green = cv2.drawContours(test,max_rect,-1,(0, 255,0),3)
+    cutImg = test[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
 
-    cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 2);
-
-    cutImg = test[max_rect[0]:max_rect[0]+max_rect[2], max_rect[1]:max_rect[1]+max_rect[3]]
-
-    plt.subplot(236)
-    plt.imshow(cutImg)
-    plt.title('cutImg')
-    plt.show()
+    # plt.subplot(236)
+    # plt.imshow(cutImg)
+    # plt.title('cutImg')
+    # plt.show()
 
 
 
-    plt.subplot(231)
-    plt.imshow(img_dct,'gray')
-    plt.title('dct')  
-    plt.subplot(232)
-    plt.imshow(gauss,'gray')
-    plt.title('gauss')
-    plt.subplot(233)
-    # plt.imshow(sign,'gray')
-    # plt.title('sign')
-    # plt.subplot(234)
+    plt.subplot(331)
+    plt.imshow(img,'gray')
+    plt.title('original')  
+      
+    plt.subplot(332)
+    plt.imshow(img2,'gray')
+    plt.title('hamming')
+
+    
+    plt.subplot(333)
+    plt.imshow(green,'gray')
+    plt.title('green')
+    plt.subplot(334)
+    plt.imshow(sign,'gray')
+    plt.title('sign')
+    plt.subplot(335)
     plt.imshow(img_recor,'gray')
     plt.title('idct')
     # plt.show()
-    plt.subplot(235)
-    plt.imshow(img_dilation,'gray')
-    plt.title('img_dilation')
-    plt.subplot(236)
-    plt.imshow(img_contours,'gray')
-    plt.title('img_contours')
+    plt.subplot(336)   
+    plt.imshow(gauss,'gray')
+    plt.title('gauss')
+    plt.subplot(337)   
+    plt.imshow(thresh,'gray')
+    plt.title('thresh')
+    plt.subplot(338)   
+    plt.imshow(img_open,'gray')
+    plt.title('img_open')
+    plt.subplot(339)   
+    plt.imshow(img_erosion,'gray')
+    plt.title('img_erosion')
+    # plt.subplot(337)  
+    # plt.imshow(img_dilation,'gray')
+    # plt.title('img_dilation')
+
+    # plt.imshow(img_dilation,'gray')
+    # plt.title('img_dilation')
+    
+    
+    # plt.subplot(336)
+    # plt.imshow(img_contours,'gray')
+    # plt.title('img_contours')
     plt.show()
 
 
