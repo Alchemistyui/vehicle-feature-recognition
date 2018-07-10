@@ -57,12 +57,19 @@ def load_h5(file_dir):
     # plt.imshow(train_set_x_orig[2])
     # pylab.show()
 
+def locator():
+    pass
+
+
 def load_picture(image_list):
-    imgs = [];
+    imgs = []
+    imgs_origin = []
     for i in range(len(image_list)):
         img = cv2.imread(image_list[i], 0)
+        img_origin = cv2.imread(image_list[i])
         # dst = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         imgs.append(img)
+        imgs_origin.append(img_origin)
     # 测试
     # io.imshow(imgs[2])
     # io.show()
@@ -70,66 +77,89 @@ def load_picture(image_list):
     #     cv2.imshow('image',imgs[i])
     #     cv2.waitKey(5)
     #     cv2.destroyAllWindows()
-    return imgs
+    return imgs, imgs_origin
 
 
-def dct(cv2imgs):
-    imgs = []
-    # imgs_log = []
+def hann (cv2imgs):
+    img_hann = []
     for i in range(len(cv2imgs)):
-        img = cv2imgs[i].astype('float')
-        img_dct = cv2.dct(img)    
-        # img_dct_log = np.log(abs(img_dct))  #进行log处理
-        imgs.append(img_dct)
-        # imgs_log.append(img_dct_log)
-    # 测试
-    # plt.imshow(imgs_log[2], 'gray')
-    # plt.title('DCT')
-    # plt.show()
-    # io.imshow(cv2imgs[2].astype('float'))
-    # io.show()
-    # io.imshow(imgs[2])
-    # io.show()
-    # cv2.imshow('image2',cv2imgs[2].astype('float'))
-    # cv2.waitKey(0)
-    # for i in range(len(cv2imgs)):
-    #     cv2.imshow('image',imgs[i])
-    #     cv2.waitKey(10)
-    # cv2.destroyAllWindows()
-    return imgs
+        img1 = cv2imgs[i].astype('float')
+        img_h, img_w = img1.shape      
+        hann =  signal.hann(img_w)
+        hann2 = signal.hann(img_h)
+        img2 = (img1.T * hann2).T * hann
+        img_hann.append(img2)
+    return img_hann
 
-def idct(img_dct):
-    imgs = [];
-    for i in range(len(img_dct)):
-        img_recor = cv2.idct(img_dct[i])
-        imgs.append(img_recor) 
-    # 测试
-    # test = imgs[2].astype()
-    # io.imshow(imgs[2])
-    # io.show()
 
-    # plt.imshow(imgs[2],'gray')
-    # plt.title('IDCT2(cv2_idct)')
-    # plt.show()
-    # cv2.imshow('image2',imgs[2])
-    # cv2.waitKey(0)
-    # for i in range(len(img_dct)):
-    #     cv2.imshow('image',imgs[i])
-    #     cv2.waitKey(10)
-    # cv2.destroyAllWindows()
-    return imgs
-
-def sign(img_dct_log):
+def dct_idct(img_hann):
     imgs = []
-    for i in range(len(img_dct_log)):
-        sign = np.sign(img_dct_log[i])
-        imgs.append(sign)
-    # io.imshow(imgs[2])
-    # io.show()
-    # plt.imshow(imgs[2],'gray')
-    # plt.title('sign(cv2_idct)')
-    # plt.show()
+    for i in range(len(img_hann)):       
+        img_dct = cv2.dct(img_hann[i])  
+        sign = np.where(np.absolute(img_dct)<0, 0, img_dct)
+        img_recor = cv2.idct(sign)   #进行离散余弦反变换
+        imgs.append(img_recor)
     return imgs
+
+# def idct(img_dct):
+#     imgs = [];
+#     for i in range(len(img_dct)):
+#         img_recor = cv2.idct(img_dct[i])
+#         imgs.append(img_recor) 
+#     # 测试
+#     # test = imgs[2].astype()
+#     # io.imshow(imgs[2])
+#     # io.show()
+
+#     # plt.imshow(imgs[2],'gray')
+#     # plt.title('IDCT2(cv2_idct)')
+#     # plt.show()
+#     # cv2.imshow('image2',imgs[2])
+#     # cv2.waitKey(0)
+#     # for i in range(len(img_dct)):
+#     #     cv2.imshow('image',imgs[i])
+#     #     cv2.waitKey(10)
+#     # cv2.destroyAllWindows()
+#     return imgs
+
+def gauss(img_idct):
+    imgs = []
+    for i in range(len(img_idct)):
+        square = np.square(img_idct[i]) 
+        gauss = filters.gaussian_filter(square,0.005)
+        normalizedImg = np.zeros((720, 1280))
+        normalizedImg = cv2.normalize(gauss,  normalizedImg, 0, 255, cv2.NORM_MINMAX)
+        imgs.append(normalizedImg)
+    return imgs
+
+def dilation(img_gauss):
+    imgs = []
+    kernel_dilation = np.ones((20, 20), np.uint8)
+    for i in range(len(img_gauss)):
+        ret,thresh=cv2.threshold(img_gauss[i],127,255,cv2.THRESH_BINARY) 
+        img_dilation = cv2.dilate(thresh,kernel_dilation,iterations = 1)
+        imgs.append(img_dilation)
+    return imgs
+
+def fin_counter(img_dilation, cv2imgs_origin):
+    for i in range(len(img_dilation)):
+        bin8bit = img_dilation[i].astype(np.uint8)
+        ret, contours, hierarchy = cv2.findContours(bin8bit,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        max_size = 0
+        max_rect = [0, 0, 0, 0]
+        for i in range(len(contours)):
+            #获得正外接矩形的左上角坐标及宽高  
+            x, y, w, h = cv2.boundingRect(contours[i])
+            if w*h > max_size and w*h:
+                max_rect[0] = x 
+                max_rect[1] = y
+                max_rect[2] = w
+                max_rect[3] = h
+                max_size = w*h
+        # 用画矩形方法绘制正外接矩形
+        green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
+        # green = cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 3);
+        cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
 
 
 
@@ -173,6 +203,8 @@ def test(cv2imgs):
 
     
     img_recor = cv2.idct(sign)    #进行离散余弦反变换
+
+
 
     square = np.square(img_recor) 
     # power = np.power(img_recor, 5)
@@ -229,9 +261,10 @@ def test(cv2imgs):
     # img_close = cv2.morphologyEx(gauss,cv2.MORPH_CLOSE,kernel_open)
 
 
-    ret, binary = cv2.threshold(img_dilation,127,255,cv2.THRESH_BINARY)
+
+    # ret, binary = cv2.threshold(img_dilation,127,255,cv2.THRESH_BINARY)
     # gray = cv2.cvtColor(img_dilation, cv2.COLOR_BGR2GRAY)
-    bin8bit = binary.astype(np.uint8)
+    bin8bit = img_dilation.astype(np.uint8)
     # bin8bit = thresh.astype(np.uint8)
 
 
@@ -252,7 +285,7 @@ def test(cv2imgs):
         # int y = boundRect[i].y;
         # //2.4.2用画矩形方法绘制正外接矩形
         x, y, w, h = cv2.boundingRect(contours[i])
-        if w*h > max_size and w*h != img_h*img_w:
+        if w*h > max_size and w*h:
             max_rect[0] = x 
             max_rect[1] = y
             max_rect[2] = w
@@ -330,21 +363,21 @@ def test(cv2imgs):
     # cv2.destroyAllWindows()
 
 
-def Gaussian(sign_img):
-    gauss = []
-    for i in range(len(sign_img)):
-        square = np.square(sign_img[i])
-        img = filters.gaussian_filter(square,0.05)
-        gauss.append(img)
-    return gauss
+# def Gaussian(sign_img):
+#     gauss = []
+#     for i in range(len(sign_img)):
+#         square = np.square(sign_img[i])
+#         img = filters.gaussian_filter(square,0.05)
+#         gauss.append(img)
+#     return gauss
 
-def Normalize(data):
-    # imgs = []
-    # for i in range(len(data)):
-    m = np.mean(data)
-    mx = data.max()
-    mn = data.min()
-    return ((float(j) - m) / (mx - mn) * 255 for j in data)
+# def Normalize(data):
+#     # imgs = []
+#     # for i in range(len(data)):
+#     m = np.mean(data)
+#     mx = data.max()
+#     mn = data.min()
+#     return ((float(j) - m) / (mx - mn) * 255 for j in data)
         # imgs.append((float(j) - m) / (mx - mn) * 255 for j in data)
 
 
@@ -365,9 +398,17 @@ image_list = get_files(train_dir)
  
 # print(image_list)
 # print(len(image_list))
-create_h5(train_dir)
-load_h5(train_dir)
-cv2imgs = load_picture(image_list)
+# create_h5(train_dir)
+# load_h5(train_dir)
+cv2imgs, cv2imgs_origin = load_picture(image_list)
+img_hann = hann(cv2imgs)
+img_idct = dct_idct(img_hann)
+img_gauss = gauss(img_idct)
+img_dilation = dilation(img_gauss)
+fin_counter(img_dilation, cv2imgs_origin)
+
+
+
 # img_dct = dct(cv2imgs)
 # sign_img = sign(img_dct)
 # # gauss_img = Gaussian(sign_img)
