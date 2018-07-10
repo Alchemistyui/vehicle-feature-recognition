@@ -135,27 +135,38 @@ def sign(img_dct_log):
 
 def test(cv2imgs):
     img = cv2.imread('/Users/ryshen/Desktop/test4.png', 0)
+    test = cv2.imread('/Users/ryshen/Desktop/test4.png')
     img1 = img.astype('float')
+    img_h, img_w = img1.shape
+    # print(img_h)
     # dst = color.rgb2gary(img)
     # img1 = io.imread(image_list[2], 1)
     # print(img1.dtype)
     # io.imshow(dst)
-    # io.show()  
-    hann = signal.hann(420)
-    img2 = img1 ** hann
+    # io.show() 
+    hann =  signal.hann(img_w)
+    hann2 = signal.hann(img_h)
+    # hann = np.mat(signal.hann(img_h)).T * np.mat(signal.hann(img_w))
+    # hann = np.dot(np.mat(signal.hann(img_w)), np.mat(signal.hann(img_h)).T)
+    # hann = np.dot(np.mat(signal.hann(img_h)).T, np.mat(signal.hann(img_w)))
+    # hann = signal.hann(img_w)
+    # print(hann)
+    # img2 = np.mat(hann2) *img1 * np.mat(hann).T
+    img2 = (img1.T * hann2).T * hann
     # pl.plot(hann)
     # pl.show()
     # scipy.signal.hamming()
     # img2 = img1.rolling(window=5, win_type='hamming')
 
     img_dct = cv2.dct(img2)         #进行离散余弦变换
+    # img_dct_log = np.log(abs(img_dct))
      
     # img_dct_log = np.log(abs(img_dct))  #进行log处理
     # sign = np.sign(img_dct) 
     # print(img_dct)
     # print(sign)
-    # sign = np.where(np.absolute(img_dct)<90, 0, img_dct)
-    sign = np.where(img_dct<20, -50, img_dct)
+    sign = np.where(np.absolute(img_dct)<0, 0, img_dct)
+    # sign = np.where(img_dct<20, -50, img_dct)
 
     # square = np.square(sign)
     # gauss = filters.gaussian_filter(square,0.01)
@@ -201,17 +212,19 @@ def test(cv2imgs):
 
 
 
-    ret,thresh=cv2.threshold(gauss,127,255,cv2.THRESH_BINARY) 
+    ret,thresh=cv2.threshold(img_recor,127,255,cv2.THRESH_BINARY) 
 
     kernel_open = np.ones((5, 5), np.uint8)
     kernel_erosion = np.ones((9, 9), np.uint8)
-    kernel_dilation = np.ones((13, 13), np.uint8)
+    kernel_dilation = np.ones((20, 20), np.uint8)
     kernel = np.ones((3, 3), np.uint8)
 
-    img_open = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel)
+    # img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel)
     # img_open = cv2.morphologyEx(gauss,cv2.MORPH_OPEN,kernel_open)
-    img_erosion = cv2.erode(img_open,kernel,iterations = 1)
-    img_dilation = cv2.dilate(img_erosion,kernel,iterations = 1)
+    # img_erosion = cv2.erode(img_open,kernel,iterations = 1)
+    # img_dilation = cv2.dilate(img_erosion,kernel,iterations = 1)
+    img_dilation = cv2.dilate(thresh,kernel_dilation,iterations = 1)
+    # img_dilation = cv2.dilate(thresh,kernel,iterations = 1)
 
     # img_close = cv2.morphologyEx(gauss,cv2.MORPH_CLOSE,kernel_open)
 
@@ -222,8 +235,8 @@ def test(cv2imgs):
     # bin8bit = thresh.astype(np.uint8)
 
 
-    ret, contours, hierarchy = cv2.findContours(bin8bit,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-    test = cv2.imread('/Users/ryshen/Desktop/test4.png')
+    ret, contours, hierarchy = cv2.findContours(bin8bit,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    
     # img_contours = cv2.drawContours(test,contours,-1,(255,0,0),3)
 
     max_size = 0
@@ -239,14 +252,15 @@ def test(cv2imgs):
         # int y = boundRect[i].y;
         # //2.4.2用画矩形方法绘制正外接矩形
         x, y, w, h = cv2.boundingRect(contours[i])
-        if w*h > max_size:
+        if w*h > max_size and w*h != img_h*img_w:
             max_rect[0] = x 
             max_rect[1] = y
             max_rect[2] = w
             max_rect[3] = h
+            max_size = w*h
     # print(max_rect)
-    # green = cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 5);
-    # green = cv2.drawContours(test,max_rect,-1,(0, 255,0),3)
+    green = cv2.rectangle(test, (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
+    # green = cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 3);
     cutImg = test[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
 
     # plt.subplot(236)
@@ -268,6 +282,8 @@ def test(cv2imgs):
     plt.subplot(333)
     plt.imshow(green,'gray')
     plt.title('green')
+    # plt.imshow(img_dct)
+    # plt.title('img_dct')
     plt.subplot(334)
     plt.imshow(sign,'gray')
     plt.title('sign')
@@ -276,17 +292,17 @@ def test(cv2imgs):
     plt.title('idct')
     # plt.show()
     plt.subplot(336)   
-    plt.imshow(gauss,'gray')
+    plt.imshow(normalizedImg,'gray')
     plt.title('gauss')
     plt.subplot(337)   
     plt.imshow(thresh,'gray')
     plt.title('thresh')
     plt.subplot(338)   
-    plt.imshow(img_open,'gray')
-    plt.title('img_open')
+    # plt.imshow(img_open,'gray')
+    # plt.title('img_open')
     plt.subplot(339)   
-    plt.imshow(img_erosion,'gray')
-    plt.title('img_erosion')
+    plt.imshow(img_dilation,'gray')
+    plt.title('img_dilation')
     # plt.subplot(337)  
     # plt.imshow(img_dilation,'gray')
     # plt.title('img_dilation')
