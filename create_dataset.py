@@ -11,6 +11,7 @@ import pylab
 from scipy.ndimage import filters
 import scipy.signal as signal
 import pylab as pl
+# import math
 # import pandas as pd
 # from sklearn import preprocessing
 
@@ -136,10 +137,12 @@ def gauss(img_idct):
 
 def dilation(img_gauss):
     imgs = []
-    kernel_dilation = np.ones((20, 20), np.uint8)
+    kernel_open = np.ones((5, 5), np.uint8)
+    kernel_dilation = np.ones((15, 15), np.uint8)
     for i in range(len(img_gauss)):
-        ret,thresh=cv2.threshold(img_gauss[i],127,255,cv2.THRESH_BINARY) 
-        img_dilation = cv2.dilate(thresh,kernel_dilation,iterations = 1)
+        ret,thresh=cv2.threshold(img_gauss[i],50,255,cv2.THRESH_BINARY) 
+        img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel_open)
+        img_dilation = cv2.dilate(img_open,kernel_dilation,iterations = 1)
         imgs.append(img_dilation)
     return imgs
 
@@ -169,12 +172,62 @@ def fin_counter(img_dilation, cv2imgs_origin, train_dir):
         cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
         cv2.imwrite(train_dir+'/out/'+str(i)+'.png', cutImg)
 
+def td(img, dir_x, dir_y):
+    h, w = img.shape
+    sum = 0
+    for x in range(w-2):
+        for y in range(h-2):
+            sum = sum + np.square(img[y,x] - img[y-dir_y, x-dir_x] - img[y+dir_y, x+dir_x])
+    return sum/(h*w)
+
+def sobel_fun(img_gauss):
+    imgs = []
+    for i in range(len(img_gauss)):
+
+        sobel_x = cv2.Sobel(img_gauss[i],cv2.CV_16S,1,0)
+        sobel_y = cv2.Sobel(img_gauss[i],cv2.CV_16S,0,1)
+
+        # sobel_x = cv2.Sobel(img,cv2.CV_16S,1,0)
+        # sobel_y = cv2.Sobel(sobel_x,cv2.CV_16S,0,1)
+
+        # return cv2.convertScaleAbs(sobel_y)
+
+        # print(td(sobel_y, 0, 1)-td(sobel_x, 1, 0))
+        
+        if td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 150:
+            print('sobel_x')
+            # return cv2.convertScaleAbs(sobel_y)
+            # io.imshow(cv2.convertScaleAbs(sobel_x))
+            # io.show()
+            # io.imshow(cv2.convertScaleAbs(sobel_y))
+            # io.show()
+            # io.imshow(cv2.convertScaleAbs(sobel_y))
+            # io.show()
+            img = cv2.convertScaleAbs(sobel_x)
+             
+        elif td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 50:
+            print('sobel_y')
+            # return cv2.convertScaleAbs(sobel_x)   # 转回uint8
+            # io.imshow(cv2.convertScaleAbs(sobel_y))
+            # io.show() 
+            sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
+            img = cv2.convertScaleAbs(sobel_xx)
+            # return img
+            
+        else :
+            print('else')
+            # return cv2.convertScaleAbs(sobel_x)
+            img = cv2.convertScaleAbs(sobel_y)
+        imgs.append(img)
+    return imgs
+
 
 def test(cv2imgs):
     img = cv2.imread('/Users/ryshen/Desktop/test4.png', 0)
     test = cv2.imread('/Users/ryshen/Desktop/test4.png')
     img1 = img.astype('float')
     img_h, img_w = img1.shape
+
     # print(img_h)
     # dst = color.rgb2gary(img)
     # img1 = io.imread(image_list[2], 1)
@@ -190,30 +243,37 @@ def test(cv2imgs):
     # print(hann)
     # img2 = np.mat(hann2) *img1 * np.mat(hann).T
     img2 = (img1.T * hann2).T * hann
-    # pl.plot(hann)
-    # pl.show()
-    # scipy.signal.hamming()
-    # img2 = img1.rolling(window=5, win_type='hamming')
 
-    img_dct = cv2.dct(img2)         #进行离散余弦变换
-    # img_dct_log = np.log(abs(img_dct))
+
+
+
+    # # pl.plot(hann)
+    # # pl.show()
+    # # scipy.signal.hamming()
+    # # img2 = img1.rolling(window=5, win_type='hamming')
+
+    # img_dct = cv2.dct(img2)         #进行离散余弦变换
+    # # img_dct_log = np.log(abs(img_dct))
      
-    # img_dct_log = np.log(abs(img_dct))  #进行log处理
-    # sign = np.sign(img_dct) 
-    # print(img_dct)
-    # print(sign)
-    sign = np.where(np.absolute(img_dct)<0, 0, img_dct)
-    # sign = np.where(img_dct<20, -50, img_dct)
+    # # img_dct_log = np.log(abs(img_dct))  #进行log处理
+    # # sign = np.sign(img_dct) 
+    # # print(img_dct)
+    # # print(sign)
+    # sign = np.where(np.absolute(img_dct)<0, 0, img_dct)
+    # # sign = np.where(img_dct<20, -50, img_dct)
 
-    # square = np.square(sign)
-    # gauss = filters.gaussian_filter(square,0.01)
+    # # square = np.square(sign)
+    # # gauss = filters.gaussian_filter(square,0.01)
 
     
-    img_recor = cv2.idct(sign)    #进行离散余弦反变换
+    # img_recor = cv2.idct(sign)    #进行离散余弦反变换
 
 
 
-    square = np.square(img_recor) 
+
+
+
+    square = np.square(img2) 
     # power = np.power(img_recor, 5)
     # power = img_recor * 10
     gauss = filters.gaussian_filter(square,0.005)
@@ -224,6 +284,9 @@ def test(cv2imgs):
     normalizedImg = np.zeros((720, 1280))
     normalizedImg = cv2.normalize(gauss,  normalizedImg, 0, 255, cv2.NORM_MINMAX)
 
+    # sobel = np.zeros((720, 1280))
+    img_sobel = sobel_fun(normalizedImg)
+    # print(type(sobel(normalizedImg, 10)))
     # normal = normalizedImg * 255
     # print(sign)
 
@@ -251,18 +314,18 @@ def test(cv2imgs):
 
 
 
-    ret,thresh=cv2.threshold(normalizedImg,50,255,cv2.THRESH_BINARY) 
+    ret,thresh=cv2.threshold(img_sobel,50,255,cv2.THRESH_BINARY) 
 
     kernel_open = np.ones((5, 5), np.uint8)
     kernel_erosion = np.ones((9, 9), np.uint8)
-    kernel_dilation = np.ones((18, 18), np.uint8)
+    kernel_dilation = np.ones((15, 15), np.uint8)
     kernel = np.ones((3, 3), np.uint8)
 
-    # img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel)
+    img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel_open)
     # img_open = cv2.morphologyEx(gauss,cv2.MORPH_OPEN,kernel_open)
-    # img_erosion = cv2.erode(img_open,kernel,iterations = 1)
-    # img_dilation = cv2.dilate(img_erosion,kernel,iterations = 1)
-    img_dilation = cv2.dilate(thresh,kernel_dilation,iterations = 1)
+    # img_erosion = cv2.erode(img_open,kernel_erosion,iterations = 1)
+    img_dilation = cv2.dilate(img_open,kernel_dilation,iterations = 1)
+    # img_dilation = cv2.dilate(thresh,kernel_dilation,iterations = 1)
     # img_dilation = cv2.dilate(thresh,kernel,iterations = 1)
 
     # img_close = cv2.morphologyEx(gauss,cv2.MORPH_CLOSE,kernel_open)
@@ -299,8 +362,8 @@ def test(cv2imgs):
             max_rect[3] = h
             max_size = w*h
     # print(max_rect)
-    green = cv2.rectangle(test, (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
-    # green = cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 3);
+    # green = cv2.rectangle(test, (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
+    green = cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 3);
     cutImg = test[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
 
     # plt.subplot(236)
@@ -325,27 +388,27 @@ def test(cv2imgs):
     # plt.imshow(img_dct)
     # plt.title('img_dct')
     plt.subplot(334)
-    plt.imshow(sign,'gray')
-    plt.title('sign')
+    plt.imshow(img_sobel,'gray')
+    plt.title('sobel')
     plt.subplot(335)
-    plt.imshow(img_recor,'gray')
-    plt.title('idct')
-    # plt.show()
-    plt.subplot(336)   
+    # plt.imshow(img_recor,'gray')
+    # plt.title('idct')
+    # # plt.show()
+    # plt.subplot(336)   
     plt.imshow(normalizedImg,'gray')
     plt.title('gauss')
-    plt.subplot(337)   
+    plt.subplot(336)   
     plt.imshow(thresh,'gray')
     plt.title('thresh')
+    plt.subplot(337)   
+    plt.imshow(img_open,'gray')
+    plt.title('img_open')
     plt.subplot(338)   
-    # plt.imshow(img_open,'gray')
-    # plt.title('img_open')
-    plt.subplot(339)   
+    # plt.imshow(img_erosion,'gray')
+    # plt.title('img_erosion')
+    plt.subplot(339)  
     plt.imshow(img_dilation,'gray')
     plt.title('img_dilation')
-    # plt.subplot(337)  
-    # plt.imshow(img_dilation,'gray')
-    # plt.title('img_dilation')
 
     # plt.imshow(img_dilation,'gray')
     # plt.title('img_dilation')
@@ -409,10 +472,14 @@ image_list = get_files(train_dir)
 # load_h5(train_dir)
 cv2imgs, cv2imgs_origin = load_picture(image_list)
 img_hann = hann(cv2imgs)
-img_idct = dct_idct(img_hann)
-img_gauss = gauss(img_idct)
-img_dilation = dilation(img_gauss)
+# img_idct = dct_idct(img_hann)
+img_gauss = gauss(img_hann)
+img_sobel = sobel_fun(img_gauss)
+img_dilation = dilation(img_sobel)
 fin_counter(img_dilation, cv2imgs_origin, train_dir)
+
+
+# test(cv2imgs)
 
 
 
@@ -421,7 +488,7 @@ fin_counter(img_dilation, cv2imgs_origin, train_dir)
 # # gauss_img = Gaussian(sign_img)
 # # normal = Normalize(gauss_img)
 # idct_img = idct(sign_img)
-# test(cv2imgs)
+
 # print(len(label_list))
 
 
