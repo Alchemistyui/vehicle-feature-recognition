@@ -77,12 +77,14 @@ def load_picture(image_list):
     #     cv2.imshow('image',imgs[i])
     #     cv2.waitKey(5)
     #     cv2.destroyAllWindows()
+
     return imgs, imgs_origin
 
 
 def hann (cv2imgs):
     img_hann = []
     for i in range(len(cv2imgs)):
+        # print(cv2imgs[i])
         img1 = cv2imgs[i].astype('float')
         img_h, img_w = img1.shape      
         hann =  signal.hann(img_w)
@@ -141,15 +143,15 @@ def dilation(img_gauss):
         imgs.append(img_dilation)
     return imgs
 
-def fin_counter(img_dilation, cv2imgs_origin):
-    for i in range(len(img_dilation)):
+def fin_counter(img_dilation, cv2imgs_origin, train_dir):
+    for i in range(len(img_dilation)): 
         bin8bit = img_dilation[i].astype(np.uint8)
         ret, contours, hierarchy = cv2.findContours(bin8bit,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         max_size = 0
         max_rect = [0, 0, 0, 0]
-        for i in range(len(contours)):
+        for j in range(len(contours)):
             #获得正外接矩形的左上角坐标及宽高  
-            x, y, w, h = cv2.boundingRect(contours[i])
+            x, y, w, h = cv2.boundingRect(contours[j])
             if w*h > max_size and w*h:
                 max_rect[0] = x 
                 max_rect[1] = y
@@ -157,10 +159,15 @@ def fin_counter(img_dilation, cv2imgs_origin):
                 max_rect[3] = h
                 max_size = w*h
         # 用画矩形方法绘制正外接矩形
+        # print(max_rect)
+        # print(cv2imgs_origin[i])
+        # io.imshow(cv2imgs_origin[i])
+        # # # io.imshow(green)
+        # io.show() 
         green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
-        # green = cv2.rectangle(test, (max_rect[0], max_rect[1]), (max_rect[0]+max_rect[2], max_rect[1]+max_rect[3]), (0, 255, 0), 3);
-        cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
 
+        cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
+        cv2.imwrite(train_dir+'/out/'+str(i)+'.png', cutImg)
 
 
 def test(cv2imgs):
@@ -244,11 +251,11 @@ def test(cv2imgs):
 
 
 
-    ret,thresh=cv2.threshold(img_recor,127,255,cv2.THRESH_BINARY) 
+    ret,thresh=cv2.threshold(normalizedImg,50,255,cv2.THRESH_BINARY) 
 
     kernel_open = np.ones((5, 5), np.uint8)
     kernel_erosion = np.ones((9, 9), np.uint8)
-    kernel_dilation = np.ones((20, 20), np.uint8)
+    kernel_dilation = np.ones((18, 18), np.uint8)
     kernel = np.ones((3, 3), np.uint8)
 
     # img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel)
@@ -405,7 +412,7 @@ img_hann = hann(cv2imgs)
 img_idct = dct_idct(img_hann)
 img_gauss = gauss(img_idct)
 img_dilation = dilation(img_gauss)
-fin_counter(img_dilation, cv2imgs_origin)
+fin_counter(img_dilation, cv2imgs_origin, train_dir)
 
 
 
@@ -414,7 +421,7 @@ fin_counter(img_dilation, cv2imgs_origin)
 # # gauss_img = Gaussian(sign_img)
 # # normal = Normalize(gauss_img)
 # idct_img = idct(sign_img)
-test(cv2imgs)
+# test(cv2imgs)
 # print(len(label_list))
 
 
