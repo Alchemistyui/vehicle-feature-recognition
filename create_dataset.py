@@ -222,9 +222,9 @@ def sobel_fun(img_gauss):
     return imgs
 
 
-def test(cv2imgs):
-    img = cv2.imread('/Users/ryshen/Desktop/test4.png', 0)
-    test = cv2.imread('/Users/ryshen/Desktop/test4.png')
+def test():
+    img = cv2.imread('/Users/ryshen/Desktop/test.png', 0)
+    test = cv2.imread('/Users/ryshen/Desktop/test.png')
     img1 = img.astype('float')
     img_h, img_w = img1.shape
 
@@ -285,7 +285,10 @@ def test(cv2imgs):
     normalizedImg = cv2.normalize(gauss,  normalizedImg, 0, 255, cv2.NORM_MINMAX)
 
     # sobel = np.zeros((720, 1280))
-    img_sobel = sobel_fun(normalizedImg)
+    # img_sobel = sobel_fun(normalizedImg)
+    
+    sobel_x = cv2.Sobel(normalizedImg,cv2.CV_16S,1,0)
+    img_sobel = cv2.convertScaleAbs(sobel_x)
     # print(type(sobel(normalizedImg, 10)))
     # normal = normalizedImg * 255
     # print(sign)
@@ -318,7 +321,7 @@ def test(cv2imgs):
 
     kernel_open = np.ones((5, 5), np.uint8)
     kernel_erosion = np.ones((9, 9), np.uint8)
-    kernel_dilation = np.ones((15, 15), np.uint8)
+    kernel_dilation = np.ones((18, 18), np.uint8)
     kernel = np.ones((3, 3), np.uint8)
 
     img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel_open)
@@ -470,16 +473,19 @@ image_list = get_files(train_dir)
 # print(len(image_list))
 # create_h5(train_dir)
 # load_h5(train_dir)
-cv2imgs, cv2imgs_origin = load_picture(image_list)
-img_hann = hann(cv2imgs)
-# img_idct = dct_idct(img_hann)
-img_gauss = gauss(img_hann)
-img_sobel = sobel_fun(img_gauss)
-img_dilation = dilation(img_sobel)
-fin_counter(img_dilation, cv2imgs_origin, train_dir)
 
 
-# test(cv2imgs)
+
+# cv2imgs, cv2imgs_origin = load_picture(image_list)
+# img_hann = hann(cv2imgs)
+# # img_idct = dct_idct(img_hann)
+# img_gauss = gauss(img_hann)
+# img_sobel = sobel_fun(img_gauss)
+# img_dilation = dilation(img_sobel)
+# fin_counter(img_dilation, cv2imgs_origin, train_dir)
+
+
+test()
 
 
 
