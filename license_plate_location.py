@@ -31,21 +31,21 @@ def Location(img):
     #灰度化图片
     print("--灰度化中--")
     img_gray = cv2.cvtColor(img_Gaussianblur,cv2.COLOR_BGR2GRAY)
-    cv2.imshow("gray scale",img_gray)
-    cv2.waitKey(0)
+    # cv2.imshow("gray scale",img_gray)
+    # cv2.waitKey(0)
 
     #提取垂直方向边缘
     print("--边缘提取中--")
     img_edge = cv2.Sobel(img_gray, cv2.CV_64F, 1, 0, SOBEL)
     img_edge_abs = cv2.convertScaleAbs(img_edge)
-    cv2.imshow("edge", img_edge_abs)
-    cv2.waitKey(0)
+    # cv2.imshow("edge", img_edge_abs)
+    # cv2.waitKey(0)
 
     #二值化图片
     print("--二值化中--")
     ret, img_thresh = cv2.threshold(img_edge_abs, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    cv2.imshow("binary image", img_thresh)
-    cv2.waitKey(0)
+    # cv2.imshow("binary image", img_thresh)
+    # cv2.waitKey(0)
 
     #开闭操作
     print("--开闭操作中--")
@@ -59,8 +59,8 @@ def Location(img):
     print("--轮廓检测中--")
     img_ret, contours, hierarchy = cv2.findContours(img_open, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     img_contours = cv2.drawContours(img_original.copy(), contours, -1, BLUE, THICKNESS)
-    cv2.imshow("Contours", img_contours)
-    cv2.waitKey(0)
+    # cv2.imshow("Contours", img_contours)
+    # cv2.waitKey(0)
 
     img_copy = img_original.copy()
     
@@ -158,7 +158,8 @@ def Judge_Contour_Color(contour, img_copy):
         return False
 
 if __name__ =="__main__":
-    img = r"C:\Users\Zelinger\Desktop\1970_01_01_08_02_35_262861_川AFQ892_蓝牌img0.jpg"
+    img = r"/Users/ryshen/Desktop/test.jpg"
+    # img = r"C:\Users\Zelinger\Desktop\1970_01_01_08_02_35_262861_川AFQ892_蓝牌img0.jpg")
     #img = r"C:\Users\Zelinger\Desktop\1970_01_25_21_33_21_113934_川A0B002_蓝牌img0.jpg"
     #img = r"C:\Users\Zelinger\Desktop\1970_01_14_01_48_22_703382_川A9PE08_蓝牌img0.jpg"
     #img = r"C:\Users\Zelinger\Desktop\1970_01_31_03_25_10_237612_川A1N1T8_蓝牌img0.jpg"
