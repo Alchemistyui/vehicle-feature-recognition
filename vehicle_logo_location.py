@@ -19,12 +19,12 @@ imgs = []
 imgs_origin = []
 path = "/Users/ryshen/Desktop/车辆" #文件夹目录
 
-def get_files(file_dir):
-    cars = []
+# def get_files(file_dir):
+#     cars = []
     
-    for file in os.listdir(file_dir+'/车辆'): 
-            cars.append(file_dir +'/车辆'+'/'+ file) 
-    return  cars
+#     for file in os.listdir(file_dir+'/车辆'): 
+#             cars.append(file_dir +'/车辆'+'/'+ file) 
+#     return  cars
 
 
 

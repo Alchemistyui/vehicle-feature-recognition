@@ -22,6 +22,8 @@ MIN_BLUE_PROPORTION = 0.2
 imgs = []
 success = 0
 path = "/Users/ryshen/Desktop/车辆" #文件夹目录
+name = 0
+cutImgs = []
 
 def Load_Img(path):
     global imgs
@@ -50,7 +52,7 @@ def Batch_Location():
 
 
 def Location(img_original):
-    global success
+    global success, cutImgs, name
     # img_original = cv2.imdecode(np.fromfile(img, dtype=np.uint8), -1)
 
 
@@ -101,7 +103,7 @@ def Location(img_original):
     #轮廓检测并画出来
     print("--轮廓检测中--")
     img_ret, contours, hierarchy = cv2.findContours(img_open, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    img_contours = cv2.drawContours(img_original.copy(), contours, -1, BLUE, THICKNESS)
+    # img_contours = cv2.drawContours(img_original.copy(), contours, -1, BLUE, THICKNESS)
     # cv2.imshow("Contours", img_contours)
     # cv2.waitKey(0)
 
@@ -112,18 +114,31 @@ def Location(img_original):
         if Judge_Contour_Size(contour,img_copy) and Judge_Contour_Color(contour, img_copy):
             
             #如果矩形的形状和颜色都判断成功，则画出对应的轮廓并显示
-            # max_rect = cv2.boundingRect(contour)
-            # print(max_rect)
-            # my_contour = cv2.rectangle(img_original.copy(), (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
-            # cv2.imshow("Contours", my_contour)
+            max_rect = cv2.boundingRect(contour)
+            print(max_rect)
+            my_contour = cv2.rectangle(img_original.copy(), (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
+            #  (x, y, w, h) 
+            # cutImg = img_original[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
+            # (x, y- 3* height, 3* height, width)
+            cutImg = img_original[max_rect[1]-4*max_rect[3]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
+            cutImgs.append(cutImg)
+            cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
+            name = name + 1
+            # print(name)
+            # cv2.imshow("Contours", cutImg)
             # cv2.waitKey(0)
             
             #取出该轮廓的最小矩形并返回它的四元组
             contour_minRectangle = cv2.minAreaRect(contour)
             points = cv2.boxPoints(contour_minRectangle).astype(int)
+            
             success = success + 1
             print(points)
             return points
+    # cv2.imshow("Contours", cutImgs[0])
+    # cv2.waitKey(0)
+
+
 
 def Judge_Contour_Size(contour,img_copy):
     
