@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import os
 
 
 SOBEL = 3
@@ -18,6 +19,28 @@ MAX_PROPORTION = 7
 LOWER_BLUE = np.array([100, 43, 46])
 UPPER_BLUE = np.array([120, 255, 255])
 MIN_BLUE_PROPORTION = 0.2
+imgs = []
+
+def Load_Img(path):
+    global imgs
+    
+    files= os.listdir(path) #得到文件夹下的所有文件名称
+    
+    # print(files)
+    for file in files: #遍历文件夹
+        # print(path+file)
+        # print(os.path.isdir(path+file))
+        if os.path.isdir(path+'/'+file): #判断是否是文件夹，不是文件夹才打开
+            Load_Img(path+'/'+file)
+
+        else :
+            # print(os.path.isdir(file))
+            # img = cv2.imread(image_list[i], 0)
+            img_original = cv2.imdecode(np.fromfile(path+'/'+file, dtype=np.uint8), -1)
+            # print("append")
+            imgs.append(img_original) 
+    # (img[0]) #打印结果
+    
 
 def Location(img):
     img_original = cv2.imdecode(np.fromfile(img, dtype=np.uint8), -1)
@@ -52,8 +75,8 @@ def Location(img):
     img_close = cv2.morphologyEx(img_thresh, cv2.MORPH_CLOSE, CLOSE_KERNEL)
     img_open = cv2.morphologyEx(img_close, cv2.MORPH_OPEN, OPEN_KERNEL)
     
-    cv2.imshow("morphological close operate", img_open)
-    cv2.waitKey(0)
+    # cv2.imshow("morphological close operate", img_open)
+    # cv2.waitKey(0)
 
     #轮廓检测并画出来
     print("--轮廓检测中--")
@@ -69,9 +92,9 @@ def Location(img):
         if Judge_Contour_Size(contour,img_copy) and Judge_Contour_Color(contour, img_copy):
             
             #如果矩形的形状和颜色都判断成功，则画出对应的轮廓并显示
-            my_contour = cv2.drawContours(img_original.copy(), contour, -1, BLUE, THICKNESS)
-            cv2.imshow("Contours", my_contour)
-            cv2.waitKey(0)
+            my_contour = cv2.drawContours(img_original.copy(), contour, -1, RED, THICKNESS)
+            # cv2.imshow("Contours", my_contour)
+            # cv2.waitKey(0)
             
             #取出该轮廓的最小矩形并返回它的四元组
             contour_minRectangle = cv2.minAreaRect(contour)
@@ -157,11 +180,19 @@ def Judge_Contour_Color(contour, img_copy):
     else:
         return False
 
-if __name__ =="__main__":
-    img = r"/Users/ryshen/Desktop/test.jpg"
+
+path = "/Users/ryshen/Desktop/车辆" #文件夹目录
+
+Load_Img(path)
+# print(imgs)
+# cv2.imshow("Gaussian blur",imgs[0])
+# cv2.waitKey(10)
+
+# if __name__ =="__main__":
+    # img = r"/Users/ryshen/Desktop/test.jpg"
     # img = r"C:\Users\Zelinger\Desktop\1970_01_01_08_02_35_262861_川AFQ892_蓝牌img0.jpg")
     #img = r"C:\Users\Zelinger\Desktop\1970_01_25_21_33_21_113934_川A0B002_蓝牌img0.jpg"
     #img = r"C:\Users\Zelinger\Desktop\1970_01_14_01_48_22_703382_川A9PE08_蓝牌img0.jpg"
     #img = r"C:\Users\Zelinger\Desktop\1970_01_31_03_25_10_237612_川A1N1T8_蓝牌img0.jpg"
     
-    Location(img)
+    # Location(img)
