@@ -21,6 +21,7 @@ UPPER_BLUE = np.array([120, 255, 255])
 MIN_BLUE_PROPORTION = 0.2
 imgs = []
 success = 0
+path = "/Users/ryshen/Desktop/车辆" #文件夹目录
 
 def Load_Img(path):
     global imgs
@@ -36,7 +37,7 @@ def Load_Img(path):
 
         else :
             # print(os.path.isdir(file))
-            # img = cv2.imread(image_list[i], 0)
+            # img = cv2.imread(path+'/'+file, 0)
             img_original = cv2.imdecode(np.fromfile(path+'/'+file, dtype=np.uint8), -1)
             # print("append")
             imgs.append(img_original) 
@@ -76,7 +77,9 @@ def Location(img_original):
 
     #提取垂直方向边缘
     # print("--边缘提取中--")
+    # img_edge = cv2.Sobel(img_Gaussianblur, cv2.CV_64F, 1, 0, SOBEL)
     img_edge = cv2.Sobel(img_gray, cv2.CV_64F, 1, 0, SOBEL)
+
     img_edge_abs = cv2.convertScaleAbs(img_edge)
     # cv2.imshow("edge", img_edge_abs)
     # cv2.waitKey(0)
@@ -119,7 +122,7 @@ def Location(img_original):
             contour_minRectangle = cv2.minAreaRect(contour)
             points = cv2.boxPoints(contour_minRectangle).astype(int)
             success = success + 1
-            # print(points)
+            print(points)
             return points
 
 def Judge_Contour_Size(contour,img_copy):
@@ -201,7 +204,7 @@ def Judge_Contour_Color(contour, img_copy):
         return False
 
 
-path = "/Users/ryshen/Desktop/车辆" #文件夹目录
+
 
 Load_Img(path)
 print(len(imgs))
