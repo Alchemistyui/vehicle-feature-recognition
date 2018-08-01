@@ -20,6 +20,7 @@ LOWER_BLUE = np.array([100, 43, 46])
 UPPER_BLUE = np.array([120, 255, 255])
 MIN_BLUE_PROPORTION = 0.2
 imgs = []
+success = 0
 
 def Load_Img(path):
     global imgs
@@ -41,37 +42,53 @@ def Load_Img(path):
             imgs.append(img_original) 
     # (img[0]) #打印结果
     
+def Batch_Location():
+    for i in range(len(imgs)):
+        Location(imgs[i])
 
-def Location(img):
-    img_original = cv2.imdecode(np.fromfile(img, dtype=np.uint8), -1)
+
+
+def Location(img_original):
+    global success
+    # img_original = cv2.imdecode(np.fromfile(img, dtype=np.uint8), -1)
+
+
+
+
 
     #高斯模糊图片
-    print("--高斯模糊中--")
+    # print("--高斯模糊中--")
     img_Gaussianblur = cv2.GaussianBlur(img_original,(5, 5),0)
     #cv2.imshow("Gaussian blur",img_Gaussianblur)
     #cv2.waitKey(0)
 
     #灰度化图片
-    print("--灰度化中--")
+    # print("--灰度化中--")
     img_gray = cv2.cvtColor(img_Gaussianblur,cv2.COLOR_BGR2GRAY)
     # cv2.imshow("gray scale",img_gray)
     # cv2.waitKey(0)
 
+
+
+
+
+
+
     #提取垂直方向边缘
-    print("--边缘提取中--")
+    # print("--边缘提取中--")
     img_edge = cv2.Sobel(img_gray, cv2.CV_64F, 1, 0, SOBEL)
     img_edge_abs = cv2.convertScaleAbs(img_edge)
     # cv2.imshow("edge", img_edge_abs)
     # cv2.waitKey(0)
 
     #二值化图片
-    print("--二值化中--")
+    # print("--二值化中--")
     ret, img_thresh = cv2.threshold(img_edge_abs, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     # cv2.imshow("binary image", img_thresh)
     # cv2.waitKey(0)
 
     #开闭操作
-    print("--开闭操作中--")
+    # print("--开闭操作中--")
     img_close = cv2.morphologyEx(img_thresh, cv2.MORPH_CLOSE, CLOSE_KERNEL)
     img_open = cv2.morphologyEx(img_close, cv2.MORPH_OPEN, OPEN_KERNEL)
     
@@ -92,14 +109,17 @@ def Location(img):
         if Judge_Contour_Size(contour,img_copy) and Judge_Contour_Color(contour, img_copy):
             
             #如果矩形的形状和颜色都判断成功，则画出对应的轮廓并显示
-            my_contour = cv2.drawContours(img_original.copy(), contour, -1, RED, THICKNESS)
+            # max_rect = cv2.boundingRect(contour)
+            # print(max_rect)
+            # my_contour = cv2.rectangle(img_original.copy(), (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
             # cv2.imshow("Contours", my_contour)
             # cv2.waitKey(0)
             
             #取出该轮廓的最小矩形并返回它的四元组
             contour_minRectangle = cv2.minAreaRect(contour)
             points = cv2.boxPoints(contour_minRectangle).astype(int)
-            print(points)
+            success = success + 1
+            # print(points)
             return points
 
 def Judge_Contour_Size(contour,img_copy):
@@ -184,15 +204,23 @@ def Judge_Contour_Color(contour, img_copy):
 path = "/Users/ryshen/Desktop/车辆" #文件夹目录
 
 Load_Img(path)
+print(len(imgs))
+Batch_Location()
+
+print('success : ')
+print(success)
+print('accuracy rate : ')
+print(success/len(imgs))
+
 # print(imgs)
 # cv2.imshow("Gaussian blur",imgs[0])
 # cv2.waitKey(10)
 
 # if __name__ =="__main__":
-    # img = r"/Users/ryshen/Desktop/test.jpg"
+img = r"/Users/ryshen/Desktop/test.jpg"
     # img = r"C:\Users\Zelinger\Desktop\1970_01_01_08_02_35_262861_川AFQ892_蓝牌img0.jpg")
     #img = r"C:\Users\Zelinger\Desktop\1970_01_25_21_33_21_113934_川A0B002_蓝牌img0.jpg"
     #img = r"C:\Users\Zelinger\Desktop\1970_01_14_01_48_22_703382_川A9PE08_蓝牌img0.jpg"
     #img = r"C:\Users\Zelinger\Desktop\1970_01_31_03_25_10_237612_川A1N1T8_蓝牌img0.jpg"
     
-    # Location(img)
+# Location(img)
