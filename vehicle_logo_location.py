@@ -18,6 +18,7 @@ import pylab as pl
 imgs = []
 imgs_origin = []
 path = "/Users/ryshen/Desktop/车辆" #文件夹目录
+train_dir = '/Users/ryshen/Desktop'
 
 # def get_files(file_dir):
 #     cars = []
@@ -36,9 +37,14 @@ def load_picture(path):
     
     # print(files)
     for file in files: #遍历文件夹
-        # print(path+file)
-        # print(os.path.isdir(path+file))
-        if os.path.isdir(path+'/'+file): #判断是否是文件夹，不是文件夹才打开
+        # img = cv2.imread(path+'/'+file, 0)
+        # img_origin = cv2.imread(path+'/'+file)
+        # # dst = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # imgs.append(img)
+        # imgs_origin.append(img_origin)
+
+
+        if os.path.isdir(path+'/'+file): 
             load_picture(path+'/'+file)
 
         else :
@@ -137,7 +143,7 @@ def fin_counter(img_dilation, cv2imgs_origin, train_dir):
         green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
 
         cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
-        cv2.imwrite(train_dir+'/out/'+str(i)+'.png', cutImg)
+        cv2.imwrite(train_dir+'/out2/'+str(i)+'.png', cutImg)
 
 def td(img, dir_x, dir_y):
     h, w = img.shape

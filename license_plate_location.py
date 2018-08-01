@@ -101,7 +101,7 @@ def Location(img_original):
     # cv2.waitKey(0)
 
     #轮廓检测并画出来
-    print("--轮廓检测中--")
+    # print("--轮廓检测中--")
     img_ret, contours, hierarchy = cv2.findContours(img_open, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # img_contours = cv2.drawContours(img_original.copy(), contours, -1, BLUE, THICKNESS)
     # cv2.imshow("Contours", img_contours)
@@ -115,12 +115,16 @@ def Location(img_original):
             
             #如果矩形的形状和颜色都判断成功，则画出对应的轮廓并显示
             max_rect = cv2.boundingRect(contour)
-            print(max_rect)
+            # print(max_rect[1])
             my_contour = cv2.rectangle(img_original.copy(), (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
             #  (x, y, w, h) 
             # cutImg = img_original[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
             # (x, y- 3* height, 3* height, width)
-            cutImg = img_original[max_rect[1]-4*max_rect[3]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
+            start = 0
+            # print(max_rect[1]-6*max_rect[3])
+            if max_rect[1]-6*max_rect[3] > 0:
+                start = max_rect[1]-5*max_rect[3]
+            cutImg = img_original[start:start+5*max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
             cutImgs.append(cutImg)
             cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
             name = name + 1
@@ -133,7 +137,7 @@ def Location(img_original):
             points = cv2.boxPoints(contour_minRectangle).astype(int)
             
             success = success + 1
-            print(points)
+            # print(points)
             return points
     # cv2.imshow("Contours", cutImgs[0])
     # cv2.waitKey(0)
