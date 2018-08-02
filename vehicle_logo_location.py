@@ -17,7 +17,7 @@ import pylab as pl
 
 imgs = []
 imgs_origin = []
-path = "/Users/ryshen/Desktop/车辆" #文件夹目录
+path = "/Users/ryshen/Desktop/粗定位" #文件夹目录
 train_dir = '/Users/ryshen/Desktop'
 
 # def get_files(file_dir):
@@ -37,22 +37,22 @@ def load_picture(path):
     
     # print(files)
     for file in files: #遍历文件夹
-        # img = cv2.imread(path+'/'+file, 0)
-        # img_origin = cv2.imread(path+'/'+file)
-        # # dst = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # imgs.append(img)
-        # imgs_origin.append(img_origin)
+        img = cv2.imread(path+'/'+file, 0)
+        img_origin = cv2.imread(path+'/'+file)
+        # dst = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        imgs.append(img)
+        imgs_origin.append(img_origin)
 
 
-        if os.path.isdir(path+'/'+file): 
-            load_picture(path+'/'+file)
+        # if os.path.isdir(path+'/'+file): 
+        #     load_picture(path+'/'+file)
 
-        else :
-            img = cv2.imread(path+'/'+file, 0)
-            img_origin = cv2.imread(path+'/'+file)
-                # dst = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            imgs.append(img)
-            imgs_origin.append(img_origin)
+        # else :
+        #     img = cv2.imread(path+'/'+file, 0)
+        #     img_origin = cv2.imread(path+'/'+file)
+        #         # dst = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        #     imgs.append(img)
+        #     imgs_origin.append(img_origin)
    
 
 def hann (cv2imgs):
@@ -111,9 +111,20 @@ def gauss(img_idct):
 def dilation(img_gauss):
     imgs = []
     kernel_open = np.ones((5, 5), np.uint8)
-    kernel_dilation = np.ones((15, 15), np.uint8)
+    kernel_dilation = np.ones((18, 18), np.uint8)
+    # kernel_open = np.ones((5, 5), np.uint8)
+    # kernel_erosion = np.ones((9, 9), np.uint8)
+    # kernel_dilation = np.ones((15, 15), np.uint8)
+    # kernel = np.ones((3, 3), np.uint8)
+
     for i in range(len(img_gauss)):
         ret,thresh=cv2.threshold(img_gauss[i],50,255,cv2.THRESH_BINARY) 
+        # img_open = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel_open)
+        # img_erosion = cv2.erode(img_open,kernel_erosion,iterations = 1)
+        # img_dilation = cv2.dilate(thresh,kernel_dilation,iterations = 1)
+        # img_dilation = cv2.dilate(thresh,kernel,iterations = 1)
+        # img_close = cv2.morphologyEx(gauss,cv2.MORPH_CLOSE,kernel_open)
+
         img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel_open)
         img_dilation = cv2.dilate(img_open,kernel_dilation,iterations = 1)
         imgs.append(img_dilation)
@@ -140,10 +151,11 @@ def fin_counter(img_dilation, cv2imgs_origin, train_dir):
         # io.imshow(cv2imgs_origin[i])
         # # # io.imshow(green)
         # io.show() 
-        green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
+        # green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
+        # green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
 
         cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
-        cv2.imwrite(train_dir+'/out2/'+str(i)+'.png', cutImg)
+        cv2.imwrite(train_dir+'/out/'+str(i)+'.png', cutImg)
 
 def td(img, dir_x, dir_y):
     h, w = img.shape

@@ -321,7 +321,7 @@ def test():
 
     kernel_open = np.ones((5, 5), np.uint8)
     kernel_erosion = np.ones((9, 9), np.uint8)
-    kernel_dilation = np.ones((18, 18), np.uint8)
+    kernel_dilation = np.ones((13, 13), np.uint8)
     kernel = np.ones((3, 3), np.uint8)
 
     img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel_open)

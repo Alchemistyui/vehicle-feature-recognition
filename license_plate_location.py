@@ -121,12 +121,15 @@ def Location(img_original):
             # cutImg = img_original[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
             # (x, y- 3* height, 3* height, width)
             start = 0
+            # w = 0
             # print(max_rect[1]-6*max_rect[3])
-            if max_rect[1]-6*max_rect[3] > 0:
-                start = max_rect[1]-5*max_rect[3]
-            cutImg = img_original[start:start+5*max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
-            cutImgs.append(cutImg)
-            cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
+            if max_rect[1]-3*max_rect[3] > 0:
+                start = max_rect[1]-3*max_rect[3]
+            # # if max_rect[0]-int(max_rect[2]/2) > 0:
+            # #     w = max_rect[0]-int(max_rect[2]/2)
+            cutImg = img_original[start:int(start+max_rect[3]*2.5), max_rect[0]:int(max_rect[0]+max_rect[2])]
+            # cutImgs.append(cutImg)
+            # cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
             name = name + 1
             # print(name)
             # cv2.imshow("Contours", cutImg)
@@ -135,7 +138,23 @@ def Location(img_original):
             #取出该轮廓的最小矩形并返回它的四元组
             contour_minRectangle = cv2.minAreaRect(contour)
             points = cv2.boxPoints(contour_minRectangle).astype(int)
-            
+
+
+            w = np.sqrt(np.sum(np.square(points[3]-points[2])))
+            h = np.sqrt(np.sum(np.square(points[0]-points[2])))
+            start = 0
+            # w = 0
+            # print(max_rect[1]-6*max_rect[3])
+            # if points[2][1]-3*h > 0:
+            #     start = points[2][1]-3*h
+            # cutImg = img_original[start:int(start+h*2.5), points[2][0]:int(points[2][0]+w)]
+            # print(h)
+            # print(w)
+            # cutImg = img_original[points[2][1]:int(points[2][1]+w), points[2][0]:int(points[2][0]+h)]
+            # cutImg = img_original[points[2][0]:int(points[2][0]+w), points[2][1]:int(points[2][1]+h)]
+            # cutImgs.append(cutImg)
+            cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
+
             success = success + 1
             # print(points)
             return points
