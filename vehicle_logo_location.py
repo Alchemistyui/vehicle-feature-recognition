@@ -111,7 +111,7 @@ def gauss(img_idct):
 def dilation(img_gauss):
     imgs = []
     kernel_open = np.ones((5, 5), np.uint8)
-    kernel_dilation = np.ones((18, 18), np.uint8)
+    kernel_dilation = np.ones((15, 15), np.uint8)
     # kernel_open = np.ones((5, 5), np.uint8)
     # kernel_erosion = np.ones((9, 9), np.uint8)
     # kernel_dilation = np.ones((15, 15), np.uint8)

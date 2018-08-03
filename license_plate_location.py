@@ -123,11 +123,11 @@ def Location(img_original):
             start = 0
             # w = 0
             # print(max_rect[1]-6*max_rect[3])
-            if max_rect[1]-3*max_rect[3] > 0:
-                start = max_rect[1]-3*max_rect[3]
+            if max_rect[1]-4*max_rect[3] > 0:
+                start = int(max_rect[1]-4*max_rect[3])
             # # if max_rect[0]-int(max_rect[2]/2) > 0:
             # #     w = max_rect[0]-int(max_rect[2]/2)
-            cutImg = img_original[start:int(start+max_rect[3]*2.5), max_rect[0]:int(max_rect[0]+max_rect[2])]
+            cutImg = img_original[start:int(start+max_rect[3]*3.5), max_rect[0]:int(max_rect[0]+max_rect[2])]
             # cutImgs.append(cutImg)
             # cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
             name = name + 1
