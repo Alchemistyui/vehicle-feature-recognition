@@ -203,6 +203,7 @@ def sobel_fun(img_gauss):
             # io.show()
             # io.imshow(cv2.convertScaleAbs(sobel_y))
             # io.show()
+
             img = cv2.convertScaleAbs(sobel_x)
              
         elif td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 50:
@@ -217,7 +218,8 @@ def sobel_fun(img_gauss):
         else :
             print('else')
             # return cv2.convertScaleAbs(sobel_x)
-            img = cv2.convertScaleAbs(sobel_y)
+            sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
+            img = cv2.convertScaleAbs(sobel_xx)
         imgs.append(img)
     return imgs
 
@@ -236,12 +238,7 @@ def test():
     # io.show() 
     hann =  signal.hann(img_w)
     hann2 = signal.hann(img_h)
-    # hann = np.mat(signal.hann(img_h)).T * np.mat(signal.hann(img_w))
-    # hann = np.dot(np.mat(signal.hann(img_w)), np.mat(signal.hann(img_h)).T)
-    # hann = np.dot(np.mat(signal.hann(img_h)).T, np.mat(signal.hann(img_w)))
-    # hann = signal.hann(img_w)
-    # print(hann)
-    # img2 = np.mat(hann2) *img1 * np.mat(hann).T
+
     img2 = (img1.T * hann2).T * hann
 
 
@@ -287,11 +284,47 @@ def test():
     # sobel = np.zeros((720, 1280))
     # img_sobel = sobel_fun(normalizedImg)
     
-    sobel_x = cv2.Sobel(normalizedImg,cv2.CV_16S,1,0)
-    img_sobel = cv2.convertScaleAbs(sobel_x)
+    # sobel_x = cv2.Sobel(normalizedImg,cv2.CV_16S,1,0)
+    # img_sobel = cv2.convertScaleAbs(sobel_x)
+    # img_sobel = sobel_fun(normalizedImg)
     # print(type(sobel(normalizedImg, 10)))
     # normal = normalizedImg * 255
     # print(sign)
+
+
+    sobel_x = cv2.Sobel(normalizedImg,cv2.CV_16S,1,0)
+    sobel_y = cv2.Sobel(normalizedImg,cv2.CV_16S,0,1)
+
+        # sobel_x = cv2.Sobel(img,cv2.CV_16S,1,0)
+        # sobel_y = cv2.Sobel(sobel_x,cv2.CV_16S,0,1)
+
+        # return cv2.convertScaleAbs(sobel_y)
+
+    print(td(sobel_y, 0, 1)-td(sobel_x, 1, 0))
+        
+    if td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 40:
+        print('sobel_x')
+        # sobel_yy = cv2.Sobel(sobel_x,cv2.CV_16S,0,1)
+        img_sobel = cv2.convertScaleAbs(sobel_x)
+             
+        
+    elif td(sobel_x, 1, 0)-td(sobel_y, 0, 1) > 40:
+        print('sobel_y')
+            # return cv2.convertScaleAbs(sobel_x)   # 转回uint8
+            # io.imshow(cv2.convertScaleAbs(sobel_y))
+            # io.show() 
+        li = np.concatenate((sobel_x,sobel_y))
+        # sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
+        img_sobel = cv2.convertScaleAbs(li)
+            # return img
+            
+    else :
+        print('else')
+            # return cv2.convertScaleAbs(sobel_x)
+        sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
+        img_sobel = cv2.convertScaleAbs(sobel_xx)
+
+
 
     # print(img_recor)
 
@@ -467,7 +500,7 @@ def test():
 
 
 train_dir = '/Users/ryshen/Desktop'
-image_list = get_files(train_dir)
+# image_list = get_files(train_dir)
  
 # print(image_list)
 # print(len(image_list))

@@ -180,7 +180,7 @@ def sobel_fun(img_gauss):
 
         # print(td(sobel_y, 0, 1)-td(sobel_x, 1, 0))
         
-        if td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 150:
+        if td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 40:
             print('sobel_x')
             # return cv2.convertScaleAbs(sobel_y)
             # io.imshow(cv2.convertScaleAbs(sobel_x))
@@ -191,19 +191,19 @@ def sobel_fun(img_gauss):
             # io.show()
             img = cv2.convertScaleAbs(sobel_x)
              
-        elif td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 50:
+        elif td(sobel_x, 1, 0)-td(sobel_y, 0, 1) > 40:
             print('sobel_y')
             # return cv2.convertScaleAbs(sobel_x)   # 转回uint8
             # io.imshow(cv2.convertScaleAbs(sobel_y))
             # io.show() 
-            sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
-            img = cv2.convertScaleAbs(sobel_xx)
+            # sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
+            img = cv2.convertScaleAbs(sobel_y)
             # return img
             
         else :
             print('else')
             # return cv2.convertScaleAbs(sobel_x)
-            img = cv2.convertScaleAbs(sobel_y)
+            img = cv2.convertScaleAbs(sobel_x)
         imgs.append(img)
     return imgs
 
