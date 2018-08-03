@@ -154,7 +154,8 @@ def fin_counter(img_dilation, cv2imgs_origin, train_dir):
         # green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
         # green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
 
-        cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
+        # cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
+        cutImg = cv2imgs_origin[i][int(max_rect[1]*0.9):max_rect[1]+int(max_rect[3]*1.2), int(max_rect[0]*0.9):max_rect[0]+int(max_rect[2])]
         cv2.imwrite(train_dir+'/out/'+str(i)+'.png', cutImg)
 
 def td(img, dir_x, dir_y):

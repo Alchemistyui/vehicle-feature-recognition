@@ -141,7 +141,7 @@ def Location(img_original):
 
 
             w = np.sqrt(np.sum(np.square(points[3]-points[2])))
-            h = np.sqrt(np.sum(np.square(points[0]-points[2])))
+            h = np.sqrt(np.sum(np.square(points[1]-points[2])))
             start = 0
             # w = 0
             # print(max_rect[1]-6*max_rect[3])
@@ -150,7 +150,7 @@ def Location(img_original):
             # cutImg = img_original[start:int(start+h*2.5), points[2][0]:int(points[2][0]+w)]
             # print(h)
             # print(w)
-            # cutImg = img_original[points[2][1]:int(points[2][1]+w), points[2][0]:int(points[2][0]+h)]
+            # cutImg = img_original[points[2][1]:int(points[2][1]+h), points[2][0]:int(points[2][0]+w)]
             # cutImg = img_original[points[2][0]:int(points[2][0]+w), points[2][1]:int(points[2][1]+h)]
             # cutImgs.append(cutImg)
             cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
