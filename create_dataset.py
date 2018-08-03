@@ -281,6 +281,8 @@ def test():
     normalizedImg = np.zeros((720, 1280))
     normalizedImg = cv2.normalize(gauss,  normalizedImg, 0, 255, cv2.NORM_MINMAX)
 
+    ret,thresh=cv2.threshold(square,127,255,cv2.THRESH_BINARY) 
+    print(thresh[100])
     # sobel = np.zeros((720, 1280))
     # img_sobel = sobel_fun(normalizedImg)
     
@@ -292,37 +294,43 @@ def test():
     # print(sign)
 
 
-    sobel_x = cv2.Sobel(normalizedImg,cv2.CV_16S,1,0)
-    sobel_y = cv2.Sobel(normalizedImg,cv2.CV_16S,0,1)
+    sobel_x = cv2.Sobel(thresh,cv2.CV_16S,1,0)
+    sobel_y = cv2.Sobel(thresh,cv2.CV_16S,0,1)
 
         # sobel_x = cv2.Sobel(img,cv2.CV_16S,1,0)
         # sobel_y = cv2.Sobel(sobel_x,cv2.CV_16S,0,1)
 
         # return cv2.convertScaleAbs(sobel_y)
 
-    print(td(sobel_y, 0, 1)-td(sobel_x, 1, 0))
+    # print(td(sobel_y, 0, 1)-td(sobel_x, 1, 0))
         
-    if td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 40:
-        print('sobel_x')
-        # sobel_yy = cv2.Sobel(sobel_x,cv2.CV_16S,0,1)
-        img_sobel = cv2.convertScaleAbs(sobel_x)
+    # if td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 40:
+    #     print('sobel_x')
+    #     # sobel_yy = cv2.Sobel(sobel_x,cv2.CV_16S,0,1)
+    #     img_sobel = cv2.convertScaleAbs(sobel_x)
              
         
-    elif td(sobel_x, 1, 0)-td(sobel_y, 0, 1) > 40:
-        print('sobel_y')
+    # elif td(sobel_x, 1, 0)-td(sobel_y, 0, 1) > 40:
+    #     print('sobel_y')
             # return cv2.convertScaleAbs(sobel_x)   # 转回uint8
             # io.imshow(cv2.convertScaleAbs(sobel_y))
             # io.show() 
-        li = np.concatenate((sobel_x,sobel_y))
+    x = sobel_x.tolist()
+    # y = sobel_y.tolist()
+    y = thresh.tolist()
+    sx = cv2.convertScaleAbs(sobel_x)
+    sy = cv2.convertScaleAbs(sobel_y)
+    li = [val for val in x if val in y]
+    arr = np.array(li)
         # sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
-        img_sobel = cv2.convertScaleAbs(li)
+    img_sobel = cv2.convertScaleAbs(arr)
             # return img
             
-    else :
-        print('else')
-            # return cv2.convertScaleAbs(sobel_x)
-        sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
-        img_sobel = cv2.convertScaleAbs(sobel_xx)
+    # else :
+    #     print('else')
+    #         # return cv2.convertScaleAbs(sobel_x)
+    #     sobel_xx = cv2.Sobel(sobel_y,cv2.CV_16S,1,0)
+    #     img_sobel = cv2.convertScaleAbs(sobel_xx)
 
 
 
@@ -350,14 +358,14 @@ def test():
 
 
 
-    ret,thresh=cv2.threshold(img_sobel,50,255,cv2.THRESH_BINARY) 
+    
 
     kernel_open = np.ones((5, 5), np.uint8)
     kernel_erosion = np.ones((9, 9), np.uint8)
     kernel_dilation = np.ones((13, 13), np.uint8)
     kernel = np.ones((3, 3), np.uint8)
 
-    img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel_open)
+    img_open = cv2.morphologyEx(img_sobel,cv2.MORPH_CLOSE,kernel_open)
     # img_open = cv2.morphologyEx(gauss,cv2.MORPH_OPEN,kernel_open)
     # img_erosion = cv2.erode(img_open,kernel_erosion,iterations = 1)
     img_dilation = cv2.dilate(img_open,kernel_dilation,iterations = 1)
@@ -427,8 +435,7 @@ def test():
     plt.imshow(img_sobel,'gray')
     plt.title('sobel')
     plt.subplot(335)
-    # plt.imshow(img_recor,'gray')
-    # plt.title('idct')
+   
     # # plt.show()
     # plt.subplot(336)   
     plt.imshow(normalizedImg,'gray')
@@ -437,9 +444,11 @@ def test():
     plt.imshow(thresh,'gray')
     plt.title('thresh')
     plt.subplot(337)   
-    plt.imshow(img_open,'gray')
-    plt.title('img_open')
+    plt.imshow(sy,'gray')
+    plt.title('sobel y')
     plt.subplot(338)   
+    plt.imshow(sx,'gray')
+    plt.title('sobel x')
     # plt.imshow(img_erosion,'gray')
     # plt.title('img_erosion')
     plt.subplot(339)  
