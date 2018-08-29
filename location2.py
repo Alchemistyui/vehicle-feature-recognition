@@ -15,15 +15,16 @@ MAX_SQUARE = 25000
 MAX_ANGLE = 30
 MIN_PROPORTION = 2
 MAX_PROPORTION = 6
-MIN_BLUE_PROPORTION = 0.45
+MIN_BLUE_PROPORTION = 0.4
 
 path = r'/Users/ryshen/Desktop/车辆' #文件夹目录
 _dir = 0
 _file = 0
 _none = 0
 _site = 0
+name = 0
 def Load_Img(path):
-    global _dir,_file,_none,_site
+    global _dir,_file,_none,_site, name
     
     files = os.listdir(path)
 
@@ -72,24 +73,26 @@ def Load_Img(path):
                         #cv2.imshow("Contour_plate", img_contour_plate)
                         #cv2.waitKey(0)
                         if (Judge_Contour_Color(contour,img_copy) is not False):
-                            # img_plate_contours = cv2.drawContours(img.copy(), contour, -1, GREEN, 2)
-                            # cv2.imshow("Plate_Contours", img_plate_contours)
-                            # cv2.waitKey(0)
+                            img_plate_contours = cv2.drawContours(img.copy(), contour, -1, GREEN, 2)
+                            #cv2.imshow("Plate_Contours", img_plate_contours)
+                            #cv2.waitKey(0)
 
-                            # 彪哥加的代码
+                             # 彪哥加的代码
                             max_rect = cv2.boundingRect(contour)
                             start = 0
-                            if max_rect[1]-4*max_rect[3] > 0:
-                                start = int(max_rect[1]-4*max_rect[3])
-                            cutImg = img_original[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
-                            # cutImg = img_original[start:int(start+max_rect[3]*3.5), max_rect[0]:int(max_rect[0]+max_rect[2])]
+                            if max_rect[1]-2*max_rect[3] > 0:
+                                start = int(max_rect[1]-2*max_rect[3])
+                            # cutImg = img[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
+                            cutImg = img[start:int(start+max_rect[3]*2 ), max_rect[0]:int(max_rect[0]+max_rect[2])]
                             name = name + 1
                             cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
+                            # print(path+'/'+file)
 
+                            # plate_contour_minRectangle = cv2.minAreaRect(contour)
+                            # plate_points = cv2.boxPoints(plate_contour_minRectangle).astype(int)
+                            # print(plate_points)                           #---------------------------------四元组返回入口
 
-                            plate_contour_minRectangle = cv2.minAreaRect(contour)
-                            plate_points = cv2.boxPoints(plate_contour_minRectangle).astype(int)
-                            print(plate_points)                           #---------------------------------四元组返回入口
+                            _site += 1
                             
                             #cv2.destroyAllWindows()
                             break
@@ -159,7 +162,7 @@ def Judge_Contour_Color(contour, img_copy):
     width, height = int(width),int(height)
 
     contour_x, contour_y = int(center_x), int(center_y)
-    print("center:(", contour_x, ",", contour_y, ")")
+    #print("center:(", contour_x, ",", contour_y, ")")
 
     deal = cv2.getRotationMatrix2D((contour_x, contour_y), angle, 1)
     img_rotated = cv2.warpAffine(img_copy, deal, (img_height, img_width))
@@ -176,20 +179,20 @@ def Judge_Contour_Color(contour, img_copy):
         if contour_y + height/2 > img_height or contour_y - height/2 < 0:
             return False
     
-    if contour_rotated is None:
+    rotated_HSV = cv2.cvtColor(contour_rotated, cv2.COLOR_BGR2HSV)
+
+    if rotated_HSV is None:
         return False
     
-    rotated_HSV = cv2.cvtColor(contour_rotated, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(rotated_HSV, LOWER_BLUE, UPPER_BLUE)
 
     total = mask.size
     blue = mask[mask == 255].size
 
-    print(_file ,"-------blue / total = ",blue / total)
-
-    if total / blue < MIN_BLUE_PROPORTION:
+    if blue / total < MIN_BLUE_PROPORTION:
         return False
     else:
+        print(_file ,"-------blue / total = ",blue / total)
         return True
     
 if __name__ == "__main__":
