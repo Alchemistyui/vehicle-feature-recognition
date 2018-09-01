@@ -15,9 +15,13 @@ import pylab as pl
 # import pandas as pd
 # from sklearn import preprocessing
 
+# 存放灰度图片的数组
 imgs = []
+# 存放原始图片的数组
 imgs_origin = []
-path = "/Users/ryshen/Desktop/粗定位" #文件夹目录
+#输入数据文件夹目录
+path = "/Users/ryshen/Desktop/粗定位" 
+#存放数据文件夹目录
 train_dir = '/Users/ryshen/Desktop'
 
 # def get_files(file_dir):
@@ -28,7 +32,7 @@ train_dir = '/Users/ryshen/Desktop'
 #     return  cars
 
 
-
+# 将粗定位图片读入至两个数组
 def load_picture(path):
     global imgs
     global imgs_origin
@@ -55,25 +59,27 @@ def load_picture(path):
         #     imgs_origin.append(img_origin)
    
 
+# 对灰度图进行汉宁窗处理
 def hann (cv2imgs):
     img_hann = []
     for i in range(len(cv2imgs)):
         # print(cv2imgs[i])
         img1 = cv2imgs[i].astype('float')
-        img_h, img_w = img1.shape      
+        img_h, img_w = img1.shape 
+        # 为对中心进行汉宁窗需要两个hann数组
         hann =  signal.hann(img_w)
         hann2 = signal.hann(img_h)
         img2 = (img1.T * hann2).T * hann
         img_hann.append(img2)
     return img_hann
 
-
+#进行离散余弦反变换
 def dct_idct(img_hann):
     imgs = []
     for i in range(len(img_hann)):       
         img_dct = cv2.dct(img_hann[i])  
         sign = np.where(np.absolute(img_dct)<0, 0, img_dct)
-        img_recor = cv2.idct(sign)   #进行离散余弦反变换
+        img_recor = cv2.idct(sign)   
         imgs.append(img_recor)
     return imgs
 
@@ -98,9 +104,11 @@ def dct_idct(img_hann):
 #     # cv2.destroyAllWindows()
 #     return imgs
 
+# 进行高斯模糊
 def gauss(img_idct):
     imgs = []
     for i in range(len(img_idct)):
+        # 先对像素值进行平方以扩大差值
         square = np.square(img_idct[i]) 
         gauss = filters.gaussian_filter(square,0.005)
         normalizedImg = np.zeros((720, 1280))
@@ -108,6 +116,7 @@ def gauss(img_idct):
         imgs.append(normalizedImg)
     return imgs
 
+# 开闭操作
 def dilation(img_gauss):
     imgs = []
     kernel_open = np.ones((5, 5), np.uint8)
@@ -130,6 +139,7 @@ def dilation(img_gauss):
         imgs.append(img_dilation)
     return imgs
 
+# 获得最后的车标位置
 def fin_counter(img_dilation, cv2imgs_origin, train_dir):
     for i in range(len(img_dilation)): 
         bin8bit = img_dilation[i].astype(np.uint8)
@@ -158,6 +168,8 @@ def fin_counter(img_dilation, cv2imgs_origin, train_dir):
         # cutImg = cv2imgs_origin[i][int(max_rect[1]*0.9):max_rect[1]+int(max_rect[3]*1.2), int(max_rect[0]*0.9):max_rect[0]+int(max_rect[2])]
         cv2.imwrite(train_dir+'/out/'+str(i)+'.png', cutImg)
 
+
+# sobel算子判断横竖条纹的辅助函数
 def td(img, dir_x, dir_y):
     h, w = img.shape
     sum = 0
@@ -166,6 +178,7 @@ def td(img, dir_x, dir_y):
             sum = sum + np.square(img[y,x] - img[y-dir_y, x-dir_x] - img[y+dir_y, x+dir_x])
     return sum/(h*w)
 
+# sobel 算子以去除横竖栅栏
 def sobel_fun(img_gauss):
     imgs = []
     for i in range(len(img_gauss)):
