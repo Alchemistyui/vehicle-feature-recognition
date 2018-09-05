@@ -146,6 +146,7 @@ def fin_counter(img_dilation, cv2imgs_origin, train_dir):
         ret, contours, hierarchy = cv2.findContours(bin8bit,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         max_size = 0
         max_rect = [0, 0, 0, 0]
+
         for j in range(len(contours)):
             #获得正外接矩形的左上角坐标及宽高  
             x, y, w, h = cv2.boundingRect(contours[j])
@@ -155,6 +156,10 @@ def fin_counter(img_dilation, cv2imgs_origin, train_dir):
                 max_rect[2] = w
                 max_rect[3] = h
                 max_size = w*h
+
+                plate_contour_minRectangle = cv2.minAreaRect(contours[j])
+                plate_points = cv2.boxPoints(plate_contour_minRectangle).astype(int)
+                print(plate_points)   
         # 用画矩形方法绘制正外接矩形
         # print(max_rect)
         # print(cv2imgs_origin[i])
@@ -164,9 +169,14 @@ def fin_counter(img_dilation, cv2imgs_origin, train_dir):
         # green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
         # green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
 
+
+
+
         cutImg = cv2imgs_origin[i][max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
         # cutImg = cv2imgs_origin[i][int(max_rect[1]*0.9):max_rect[1]+int(max_rect[3]*1.2), int(max_rect[0]*0.9):max_rect[0]+int(max_rect[2])]
         cv2.imwrite(train_dir+'/out/'+str(i)+'.png', cutImg)
+
+        
 
 
 # sobel算子判断横竖条纹的辅助函数
@@ -194,7 +204,7 @@ def sobel_fun(img_gauss):
         # print(td(sobel_y, 0, 1)-td(sobel_x, 1, 0))
         
         if td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 40:
-            print('sobel_x')
+            # print('sobel_x')
             # return cv2.convertScaleAbs(sobel_y)
             # io.imshow(cv2.convertScaleAbs(sobel_x))
             # io.show()
@@ -205,7 +215,7 @@ def sobel_fun(img_gauss):
             img = cv2.convertScaleAbs(sobel_x)
              
         elif td(sobel_x, 1, 0)-td(sobel_y, 0, 1) > 40:
-            print('sobel_y')
+            # print('sobel_y')
             # return cv2.convertScaleAbs(sobel_x)   # 转回uint8
             # io.imshow(cv2.convertScaleAbs(sobel_y))
             # io.show() 
@@ -214,7 +224,7 @@ def sobel_fun(img_gauss):
             # return img
             
         else :
-            print('else')
+            # print('else')
             # return cv2.convertScaleAbs(sobel_x)
             img = cv2.convertScaleAbs(sobel_x)
         imgs.append(img)

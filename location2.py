@@ -80,10 +80,10 @@ def Load_Img(path):
                              # 彪哥加的代码
                             max_rect = cv2.boundingRect(contour)
                             start = 0
-                            if max_rect[1]-2*max_rect[3] > 0:
-                                start = int(max_rect[1]-2*max_rect[3])
+                            if max_rect[1]-3*max_rect[3] > 0:
+                                start = int(max_rect[1]-3*max_rect[3])
                             # cutImg = img[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
-                            cutImg = img[start:int(start+max_rect[3]*2 ), max_rect[0]:int(max_rect[0]+max_rect[2])]
+                            cutImg = img[start:int(start+max_rect[3]*3 ), max_rect[0]:int(max_rect[0]+max_rect[2])]
                             name = name + 1
                             cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
                             # print(path+'/'+file)
