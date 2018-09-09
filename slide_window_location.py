@@ -124,5 +124,5 @@ for i in range(1,9):
     model.save('model'+str(i)+'.h5')
     del model
 
-
+# model = load_model('my_model.h5')
 
