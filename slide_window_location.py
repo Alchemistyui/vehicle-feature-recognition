@@ -29,7 +29,7 @@ batch_size = 5
 # 0-9手写数字一个有10个类别
 num_classes = 2
 # epochs,12次完整迭代
-epochs = 12
+epochs = 5
 # 输入的图片是28*28像素的灰度图
 img_rows, img_cols = 250, 250
 # 读取里面有几个文件夹
@@ -76,7 +76,7 @@ def mk_dataset():
     X = np.array(images)
     # print(X.shape)
     y = np.array(list(map(int, labels)))
-    print(y.shape)
+    # print(y.shape)
     x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=30)
     return x_train, x_test, y_train, y_test
 
@@ -124,6 +124,7 @@ def data_preprocessor(x_train, x_test, y_train, y_test):
 def build_model(input_shape, x_train, x_test, y_train, y_test):
     for i in range(1,9):
         # Sequential类
+        # print(x_train.shape)
         model = Sequential()
 
         # 加上一个2D卷积层， 32个输出（也就是卷积通道），激活函数选用relu，
@@ -134,13 +135,15 @@ def build_model(input_shape, x_train, x_test, y_train, y_test):
         # nb = 30+20*i
         core = 30+2*i
         step = 2*i
+
+
         model.add(Conv2D(16,
          kernel_size= core,
          strides=step,
          activation='relu',
          input_shape=input_shape))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        # 64个通道的卷积层
+
         # 替代全连接层
         model.add(Conv2D(400,
          kernel_size= 5,
@@ -148,14 +151,14 @@ def build_model(input_shape, x_train, x_test, y_train, y_test):
         model.add(Conv2D(400,
          kernel_size= 1,
          activation='relu'))
-        model.add(Conv2D(1,
+        model.add(Conv2D(2,
          kernel_size= 1,
-         activation='relu'))
+         activation='softmax'))
+        # model.add(Flatten())
 
-        
-        # 对输入采用0.5概率的Dropout
+        # # 对输入采用0.5概率的Dropout
         # model.add(Dropout(0.5))
-        # 对刚才Dropout的输出采用softmax激活函数，得到最后结果0-9
+        # # 对刚才Dropout的输出采用softmax激活函数，得到最后结果0-9
         # model.add(Dense(num_classes, activation='softmax'))
 
 
@@ -193,6 +196,7 @@ if __name__ == '__main__':
     
     x_train, x_test, y_train, y_test = mk_dataset()
     input_shape, x_train, x_test, y_train, y_test = data_preprocessor(x_train, x_test, y_train, y_test)
+    # X_training= tf.reshape(X_training,[-1,288, 512, 3])
     build_model(input_shape, x_train, x_test, y_train, y_test)
 
 
