@@ -11,7 +11,7 @@ from PIL import Image
 from skimage import io,transform
 from sklearn.model_selection import train_test_split
 from keras.datasets import mnist
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Flatten, Permute
 from keras.layers import Conv2D, MaxPooling2D, Reshape
 from keras import backend as K
@@ -25,13 +25,14 @@ from keras import backend as K
 
 
 # batch_size 太小会导致训练慢，过拟合等问题，太大会导致欠拟合。
-batch_size = 50
+batch_size = 10
 # 0-9手写数字一个有10个类别
 num_classes = 2
 # epochs,12次完整迭代
-epochs = 5
+epochs = 12
 # 输入的图片是28*28像素的灰度图
-
+col, row = 0, 0
+max_p = 0
 # 读取里面有几个文件夹
 text = os.listdir('/Users/ryshen/Desktop/logo_train')
 images = []
@@ -52,6 +53,7 @@ labels = []
 def read_image(imageName, img_rows, img_cols):
     # im = Image.open(imageName).resize((250,250))
     im = cv2.imread(imageName)
+    # cv2.imshow('emm',im)
     img = cv2.resize(im,(img_rows, img_cols),interpolation=cv2.INTER_CUBIC)
     # img = io.imread(imageName)
     # print(im.shape)
@@ -65,6 +67,7 @@ def read_image(imageName, img_rows, img_cols):
 
 def mk_dataset(img_rows, img_cols):
     global images,labels
+    images, labels = [], []
     # 把文件夹里面的图片和其对应的文件夹的名字也就是对应的字
     for textPath in text:
         for fn in os.listdir(os.path.join('/Users/ryshen/Desktop/logo_train/', textPath)):
@@ -72,21 +75,33 @@ def mk_dataset(img_rows, img_cols):
             images.append(read_image(fd, img_rows, img_cols))
             labels.append(textPath)
     # 得到了numpy格式的数据集
-
+    # print(len(images))
     X = np.array(images)
-    # print(X.shape)
+    print(X.shape)
     y = np.array(list(map(int, labels)))
-    # print(y.shape)
+    print(y.shape)
     x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=30)
     return x_train, x_test, y_train, y_test
 
+
+def read_x():
+    global images
+    images = []
+
+    for fn in os.listdir('/Users/ryshen/Desktop/粗定位'):
+            fd = os.path.join('/Users/ryshen/Desktop/粗定位/', fn)
+            # print(fd)
+            images.append(read_image(fd, 300, 300))
+    x_new = np.array(images)
+
+    return x_new
 
 
 
  
 def data_preprocessor(x_train, x_test, y_train, y_test, img_rows, img_cols):
     # # keras输入数据有两种格式，一种是通道数放在前面，一种是通道数放在后面，
-    # print(x_train.shape)
+    # print('emmm',x_train.shape)
     if K.image_data_format() == 'channels_first':
      # x_train = x_train.reshape(x_train.shape[0], 3, img_rows, img_cols)
      # x_test = x_test.reshape(x_test.shape[0], 3, img_rows, img_cols)
@@ -110,8 +125,8 @@ def data_preprocessor(x_train, x_test, y_train, y_test, img_rows, img_cols):
     x_train /= 255
     x_test /= 255
     print('x_train shape:', x_train.shape)
-    print(x_train.shape[0], 'train samples')
-    print(x_test.shape[0], 'test samples')
+    # print(x_train.shape[0], 'train samples')
+    # print(x_test.shape[0], 'test samples')
 
     # 把类别0-9变成2进制，方便训练
     y_train = keras.utils.np_utils.to_categorical(y_train, num_classes)
@@ -151,13 +166,14 @@ def build_model(input_shape, x_train, x_test, y_train, y_test, i):
     model.add(Conv2D(400,
      kernel_size= 5,
      activation='relu'))
+    model.add(Dropout(0.5))
     model.add(Conv2D(400,
      kernel_size= 1,
      activation='relu'))
     model.add(Conv2D(2,
      kernel_size= 1,
      activation='softmax'))
-    model.add(Reshape(-1,2))
+    model.add(Reshape((-1,2)))
     # model.add(Permute((-1,1,2)))
     # model.add(Permute((-1,2)))
     # model.add(Reshape((-1,2)))
@@ -201,24 +217,31 @@ def build_model(input_shape, x_train, x_test, y_train, y_test, i):
 
 
 def location(model_name, x_new):
+    global row, col, max_p
     model = load_model(model_name)
     y_new = model.predict_proba(x_new)
     print(y_new.shape)
 
     p = y_new[:, :, 1]
     print(p)
-
+    if np.max(p) > max_p:
+        row, col = np.where(np.max(p))
+        max_p = np.max(p)
 
 
 
 
 
 if __name__ == '__main__':
-    for i in range(1, 9):
-        img_rows, img_cols = 30+i*20, 30+i*20
-        x_train, x_test, y_train, y_test = mk_dataset(img_rows, img_cols)
-        input_shape, x_train, x_test, y_train, y_test = data_preprocessor(x_train, x_test, y_train, y_test, img_rows, img_cols)
-        # X_training= tf.reshape(X_training,[-1,288, 512, 3])
-        build_model(input_shape, x_train, x_test, y_train, y_test, i)
+    # for i in range(1, 9):
+    #     print('--------size:', i)
+    #     img_rows, img_cols = 30+i*20, 30+i*20
+    #     x_train, x_test, y_train, y_test = mk_dataset(img_rows, img_cols)
+    #     input_shape, x_train, x_test, y_train, y_test = data_preprocessor(x_train, x_test, y_train, y_test, img_rows, img_cols)
+    #     # X_training= tf.reshape(X_training,[-1,288, 512, 3])
+    #     build_model(input_shape, x_train, x_test, y_train, y_test, i)
+
+    x_new = read_x()
+    location('model1.h5', x_new)
 
 
