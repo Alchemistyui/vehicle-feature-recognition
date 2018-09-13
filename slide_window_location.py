@@ -209,25 +209,59 @@ def build_model(input_shape, x_train, x_test, y_train, y_test, i):
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
-    model.save('model'+str(i)+'.h5')
+    # model.save('model'+str(i)+'.h5')
+    model.save_weights('model'+str(i)+'.h5')
     del model
 
       
     # model = load_model('my_model.h5')
 
 
-def location(model_name, x_new):
+def location(model_name, x_new, i):
     global row, col, max_p
-    model = load_model(model_name)
-    y_new = model.predict_proba(x_new)
+    # model = load_model(model_name)
+    print(x_new.shape)
+
+
+    model = Sequential()
+
+    core = 30+2*i
+    step = 2*i
+
+    model.add(Conv2D(16,
+     kernel_size= core,
+     strides=step,
+     activation='relu',
+     input_shape=(300, 300, 3)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    # 替代全连接层
+    model.add(Conv2D(400,
+     kernel_size= 5,
+     activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Conv2D(400,
+     kernel_size= 1,
+     activation='relu'))
+    model.add(Conv2D(2,
+     kernel_size= 1,
+     activation='softmax'))
+    model.add(Reshape((-1,2)))
+
+    model.load_weights(model_name)
+
+
+    y_new = model.predict(x_new)
+
+    # y_new = model.predict_proba(x_new)
     print(y_new.shape)
 
-    p = y_new[:, :, 1]
+    p = y_new[0, :, :, 1]
     print(p)
     if np.max(p) > max_p:
         row, col = np.where(np.max(p))
         max_p = np.max(p)
-
+    print(row, col, max_p)
 
 
 
@@ -242,6 +276,9 @@ if __name__ == '__main__':
     #     build_model(input_shape, x_train, x_test, y_train, y_test, i)
 
     x_new = read_x()
-    location('model1.h5', x_new)
+    # print(x_new.shape)
+    # for i in range(len(x_new)):
+    for j in range(1,9):
+        location('model'+str(j)+'.h5', x_new, j)
 
 
