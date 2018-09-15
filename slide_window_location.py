@@ -88,8 +88,8 @@ def read_x():
     global images
     images = []
 
-    for fn in os.listdir('/Users/ryshen/Desktop/粗定位'):
-            fd = os.path.join('/Users/ryshen/Desktop/粗定位/', fn)
+    for fn in os.listdir('/Users/ryshen/Desktop/粗定位2'):
+            fd = os.path.join('/Users/ryshen/Desktop/粗定位2/', fn)
             # print(fd)
             images.append(read_image(fd, 300, 300))
     x_new = np.array(images)
@@ -133,8 +133,8 @@ def data_preprocessor(x_train, x_test, y_train, y_test, img_rows, img_cols):
     y_test = keras.utils.np_utils.to_categorical(y_test, num_classes)
 
     print('y_train shape:', y_train.shape)
-    y_train = y_train.reshape(y_train.shape[0], 1, 2)
-    y_test = y_test.reshape(y_test.shape[0], 1, 2)
+    y_train = y_train.reshape(y_train.shape[0], 1, 1, 2)
+    y_test = y_test.reshape(y_test.shape[0], 1, 1, 2)
 
     return input_shape, x_train, x_test, y_train, y_test
 
@@ -173,7 +173,7 @@ def build_model(input_shape, x_train, x_test, y_train, y_test, i):
     model.add(Conv2D(2,
      kernel_size= 1,
      activation='softmax'))
-    model.add(Reshape((-1,2)))
+    # model.add(Reshape((-1,2)))
     # model.add(Permute((-1,1,2)))
     # model.add(Permute((-1,2)))
     # model.add(Reshape((-1,2)))
@@ -220,7 +220,7 @@ def build_model(input_shape, x_train, x_test, y_train, y_test, i):
 def location(model_name, x_new, i):
     global row, col, max_p
     # model = load_model(model_name)
-    print(x_new.shape)
+    # print(x_new.shape)
 
 
     model = Sequential()
@@ -246,7 +246,7 @@ def location(model_name, x_new, i):
     model.add(Conv2D(2,
      kernel_size= 1,
      activation='softmax'))
-    model.add(Reshape((-1,2)))
+    # model.add(Reshape((-1,2)))
 
     model.load_weights(model_name)
 
@@ -254,14 +254,16 @@ def location(model_name, x_new, i):
     y_new = model.predict(x_new)
 
     # y_new = model.predict_proba(x_new)
-    print(y_new.shape)
+    # print(y_new.shape)
+    # print(y_new)
 
     p = y_new[0, :, :, 1]
-    print(p)
+    # print(p)
     if np.max(p) > max_p:
-        row, col = np.where(np.max(p))
+        # row, col = np.where(np.max(p))
         max_p = np.max(p)
-    print(row, col, max_p)
+        print(np.where(np.max(p)))
+    # print(row, col, max_p)
 
 
 
