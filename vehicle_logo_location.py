@@ -231,6 +231,114 @@ def sobel_fun(img_gauss):
     return imgs
 
 
+def test():
+    emm = cv2.imread('/Users/ryshen/Desktop/test.png')
+    img = cv2.imread('/Users/ryshen/Desktop/test.png', 0)
+    img1 = img.astype('float')
+    # dst = color.rgb2gary(img)
+    # img1 = io.imread(image_list[2], 1)
+    # print(img1.dtype)
+    # io.imshow(dst)
+    # io.show()  
+
+    img_h, img_w = img1.shape 
+    # 为对中心进行汉宁窗需要两个hann数组
+    hann =  signal.hann(img_w)
+    hann2 = signal.hann(img_h)
+    img_hann = (img1.T * hann2).T * hann
+
+    square = np.square(img_hann) 
+    gauss = filters.gaussian_filter(square,0.005)
+    normalizedImg = np.zeros((720, 1280))
+    img_gauss = cv2.normalize(gauss,  normalizedImg, 0, 255, cv2.NORM_MINMAX)
+
+
+    sobel_x = cv2.Sobel(img_gauss,cv2.CV_16S,1,0)
+    sobel_y = cv2.Sobel(img_gauss,cv2.CV_16S,0,1)
+
+    
+    if td(sobel_y, 0, 1)-td(sobel_x, 1, 0) > 40:
+
+        img_sobel = cv2.convertScaleAbs(sobel_x)
+         
+    elif td(sobel_x, 1, 0)-td(sobel_y, 0, 1) > 40:
+
+        img_sobel = cv2.convertScaleAbs(sobel_y)
+       
+    else :
+        img_sobel = cv2.convertScaleAbs(sobel_x)
+
+
+    kernel_open = np.ones((5, 5), np.uint8)
+    kernel_dilation = np.ones((15, 15), np.uint8)
+
+    ret,thresh=cv2.threshold(img_sobel,50,255,cv2.THRESH_BINARY) 
+
+    img_open = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel_open)
+    img_dilation = cv2.dilate(img_open,kernel_dilation,iterations = 1)
+
+    bin8bit = img_dilation.astype(np.uint8)
+    ret, contours, hierarchy = cv2.findContours(bin8bit,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    max_size = 0
+    max_rect = [0, 0, 0, 0]
+
+    for j in range(len(contours)):
+        #获得正外接矩形的左上角坐标及宽高  
+        x, y, w, h = cv2.boundingRect(contours[j])
+        if w*h > max_size and w*h:
+            max_rect[0] = x 
+            max_rect[1] = y
+            max_rect[2] = w
+            max_rect[3] = h
+            max_size = w*h
+
+            # plate_contour_minRectangle = cv2.minAreaRect(contours[j])
+            # plate_points = cv2.boxPoints(plate_contour_minRectangle).astype(int)
+            # print(plate_points)   
+    # 用画矩形方法绘制正外接矩形
+    # print(max_rect)
+    # print(cv2imgs_origin[i])
+    # green = cv2.rectangle(emm, (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
+    # io.imshow(img_dilation)
+    # # # io.imshow(green)
+    # io.show() 
+    # green = cv2.rectangle(cv2imgs_origin[i], (int(max_rect[0]*0.9), int(max_rect[1]*0.9)), (max_rect[0]+int(max_rect[2]*1.2), max_rect[1]+int(max_rect[3]*1.2)), (0, 255, 0), 3);
+    green = cv2.rectangle(emm, (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
+
+
+
+
+
+    plt.subplot(231)
+    plt.imshow(img,'gray')
+    plt.title('gray')  
+    plt.subplot(232)
+    plt.imshow(img_hann,'gray')
+    plt.title('hanning')
+    plt.subplot(234)
+    plt.imshow(img_gauss,'gray')
+    plt.title('gauss')
+    plt.subplot(235)
+    plt.imshow(img_sobel,'gray')
+    plt.title('sobel')
+    # plt.subplot(235)
+    # plt.imshow(img_dilation,'gray')
+    # plt.title('dilation')
+    # plt.show()
+    plt.subplot(236)
+    plt.imshow(green,'gray')
+    plt.title('final')
+    plt.show()
+
+    # cv2.imshow('image3',img)
+    # cv2.waitKey(0)
+    # cv2.imshow('image2',img1)
+    # cv2.waitKey(0)
+    # cv2.imshow('image',img_recor)
+    # cv2.waitKey(0)
+    # cv2.imshow('image1',img_dct)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
 
 
@@ -240,14 +348,14 @@ def sobel_fun(img_gauss):
 
 
 # cv2imgs, cv2imgs_origin = load_picture(path)
-load_picture(path)
-img_hann = hann(imgs)
-# img_idct = dct_idct(img_hann)
-img_gauss = gauss(img_hann)
-img_sobel = sobel_fun(img_gauss)
-img_dilation = dilation(img_sobel)
-fin_counter(img_dilation, imgs_origin, train_dir)
+# load_picture(path)
+# img_hann = hann(imgs)
+# # img_idct = dct_idct(img_hann)
+# img_gauss = gauss(img_hann)
+# img_sobel = sobel_fun(img_gauss)
+# img_dilation = dilation(img_sobel)
+# fin_counter(img_dilation, imgs_origin, train_dir)
 
-
+test()
 
 
