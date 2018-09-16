@@ -17,7 +17,7 @@ MIN_PROPORTION = 2
 MAX_PROPORTION = 6
 MIN_BLUE_PROPORTION = 0.4
 
-path = r'/Users/ryshen/Desktop/车辆' #文件夹目录
+path = r'/Users/ryshen/Desktop/粗定位2' #文件夹目录
 _dir = 0
 _file = 0
 _none = 0
@@ -69,13 +69,24 @@ def Load_Img(path):
                 img_copy = img.copy()
                 for contour in contours:
                     if (Judge_Contour_Size(contour,img_copy) is not False):
-                        img_contour_plate = cv2.drawContours(img.copy(), contour, -1, RED, 2)
+                        # img_contour_plate = cv2.drawContours(img.copy(), contour, -1, RED, 2)
                         #cv2.imshow("Contour_plate", img_contour_plate)
                         #cv2.waitKey(0)
                         if (Judge_Contour_Color(contour,img_copy) is not False):
-                            img_plate_contours = cv2.drawContours(img.copy(), contour, -1, GREEN, 2)
-                            #cv2.imshow("Plate_Contours", img_plate_contours)
-                            #cv2.waitKey(0)
+                            img2 = img.copy()
+                            max_rect = cv2.boundingRect(contour)
+                            start = 0
+                            if max_rect[1]-2*max_rect[3] > 0:
+                                start = int(max_rect[1]-2*max_rect[3])
+                                print(contour)
+                            # img_plate_contours = cv2.drawContours(img2, contour, -1, GREEN, 2)
+                            # img_plate_contours = img2[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
+                            # cutImg = img2[start:int(start+max_rect[3]*3.5), max_rect[0]:int(max_rect[0]+max_rect[2])]
+                            # img_plate_contours = cv2.drawContours(img2, [max_rect[0],start,max_rect[2],max_rect[3]*3], -1, RED, 2)
+                            my_contour = cv2.rectangle(img2, (int(max_rect[0]), int(max_rect[1])), (max_rect[0]+int(max_rect[2]), max_rect[1]+int(max_rect[3])), (0, 255, 0), 3);
+                            my_contour2 = cv2.rectangle(img2, (int(max_rect[0]), int(start)), (max_rect[0]+int(max_rect[2]), start+int(max_rect[3]*2)), RED, 3);
+                            cv2.imshow("粗定位", my_contour2)
+                            cv2.waitKey(0)
 
                              # 彪哥加的代码
                             max_rect = cv2.boundingRect(contour)
@@ -83,10 +94,12 @@ def Load_Img(path):
                             if max_rect[1]-3*max_rect[3] > 0:
                                 start = int(max_rect[1]-3*max_rect[3])
                             # cutImg = img[max_rect[1]:max_rect[1]+max_rect[3], max_rect[0]:max_rect[0]+max_rect[2]]
-                            cutImg = img[start:int(start+max_rect[3]*3 ), max_rect[0]:int(max_rect[0]+max_rect[2])]
-                            name = name + 1
-                            cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
+                            # cutImg = img[start:int(start+max_rect[3]*3 ), max_rect[0]:int(max_rect[0]+max_rect[2])]
+                            # name = name + 1
+                            # cv2.imwrite('/Users/ryshen/Desktop/粗定位/'+str(name)+'.png', cutImg)
                             # print(path+'/'+file)
+
+
 
                             # plate_contour_minRectangle = cv2.minAreaRect(contour)
                             # plate_points = cv2.boxPoints(plate_contour_minRectangle).astype(int)

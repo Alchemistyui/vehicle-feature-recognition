@@ -259,7 +259,7 @@ def location(model_name, x_new, i):
 
     p = y_new[0, :, :, 1]
     # print(p)
-    if np.max(p) > max_p:
+    if np.max(p) > max_p: 
         # row, col = np.where(np.max(p))
         max_p = np.max(p)
         print(np.where(np.max(p)))
