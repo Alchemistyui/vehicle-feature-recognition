@@ -348,14 +348,14 @@ def test():
 
 
 # cv2imgs, cv2imgs_origin = load_picture(path)
-# load_picture(path)
-# img_hann = hann(imgs)
-# # img_idct = dct_idct(img_hann)
-# img_gauss = gauss(img_hann)
-# img_sobel = sobel_fun(img_gauss)
-# img_dilation = dilation(img_sobel)
-# fin_counter(img_dilation, imgs_origin, train_dir)
+load_picture(path)
+img_hann = hann(imgs)
+# img_idct = dct_idct(img_hann)
+img_gauss = gauss(img_hann)
+img_sobel = sobel_fun(img_gauss)
+img_dilation = dilation(img_sobel)
+fin_counter(img_dilation, imgs_origin, train_dir)
 
-test()
+# test()
 
 
